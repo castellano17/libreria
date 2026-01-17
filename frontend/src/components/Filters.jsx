@@ -103,7 +103,7 @@ export default function Filters({ onFilterChange, activeFilters }) {
 
       {/* Filtros */}
       <div
-        className={`${showFilters ? "block" : "hidden"} sm:flex flex-wrap items-center gap-2 sm:gap-3`}
+        className={`${showFilters ? "block" : "hidden"} sm:flex flex-wrap items-center gap-2 sm:gap-3 space-y-2 sm:space-y-0`}
       >
         {/* Género */}
         <div className="flex-1 min-w-[140px] sm:min-w-[160px] sm:max-w-[200px]">
@@ -181,7 +181,7 @@ export default function Filters({ onFilterChange, activeFilters }) {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="px-3 py-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1"
+            className="px-3 py-2 rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 text-sm hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1 mt-2 sm:mt-0"
           >
             <svg
               className="w-4 h-4"

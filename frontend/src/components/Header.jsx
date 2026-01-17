@@ -95,9 +95,12 @@ export default function Header({
             {isScanning ? (
               <button
                 onClick={onCancelScan}
-                className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors flex items-center gap-1.5"
               >
                 <span className="hidden sm:inline">Cancelar</span>
+                <span className="sm:hidden text-[10px]">
+                  {scanStatus.processed}/{scanStatus.total_files}
+                </span>
                 <svg
                   className="w-4 h-4 sm:hidden"
                   fill="none"
@@ -115,7 +118,7 @@ export default function Header({
             ) : (
               <button
                 onClick={onStartScan}
-                className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors flex items-center gap-1.5"
               >
                 <span className="hidden sm:inline">Escanear</span>
                 <svg
@@ -131,6 +134,9 @@ export default function Header({
                     d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                   />
                 </svg>
+                <span className="sm:hidden text-[10px] text-gray-500 dark:text-gray-400">
+                  Scan
+                </span>
               </button>
             )}
 
