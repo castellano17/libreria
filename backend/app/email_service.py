@@ -5,6 +5,7 @@ from email.mime.text import MIMEText
 from email import encoders
 from pathlib import Path
 import os
+import re
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -17,6 +18,27 @@ SMTP_EMAIL = os.getenv("SMTP_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 
 
+def clean_filename(title: str, file_path: Path) -> str:
+    """Limpia y valida el nombre del archivo para Kindle."""
+    if not title or title.strip() == "" or title.lower() in ["noname", "none", "null"]:
+        # Usar el nombre del archivo sin extensión como fallback
+        title = file_path.stem
+    
+    # Limpiar caracteres problemáticos
+    title = re.sub(r'[<>:"/\\|?*]', '', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    
+    # Limitar longitud
+    if len(title) > 100:
+        title = title[:100].strip()
+    
+    # Si aún está vacío, usar nombre genérico
+    if not title:
+        title = f"Libro_{file_path.stem}"
+    
+    return title
+
+
 def send_to_kindle(kindle_email: str, book_title: str, epub_path: str) -> dict:
     """Envía un EPUB al email de Kindle."""
     try:
@@ -24,14 +46,17 @@ def send_to_kindle(kindle_email: str, book_title: str, epub_path: str) -> dict:
         if not file_path.exists():
             return {"success": False, "error": "Archivo no encontrado"}
 
+        # Limpiar y validar el título del libro
+        clean_title = clean_filename(book_title, file_path)
+
         # Crear mensaje
         msg = MIMEMultipart()
         msg['From'] = SMTP_EMAIL
         msg['To'] = kindle_email
-        msg['Subject'] = book_title
+        msg['Subject'] = clean_title
 
         # Cuerpo del mensaje
-        body = f"Libro: {book_title}"
+        body = f"Libro: {clean_title}"
         msg.attach(MIMEText(body, 'plain'))
 
         # Adjuntar EPUB
@@ -41,7 +66,7 @@ def send_to_kindle(kindle_email: str, book_title: str, epub_path: str) -> dict:
             encoders.encode_base64(part)
             part.add_header(
                 'Content-Disposition',
-                f'attachment; filename="{book_title}.epub"'
+                f'attachment; filename="{clean_title}.epub"'
             )
             msg.attach(part)
 
