@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .book-card {
+    @apply bg-white dark:bg-gray-900 rounded-2xl overflow-hidden shadow-sm 
+           hover:shadow-xl transition-all duration-300 ease-out
+           hover:-translate-y-1 cursor-pointer;
+  }
+
+  .search-input {
+    @apply w-full px-5 py-3.5 rounded-xl border-0 
+           bg-gray-100 dark:bg-gray-800 
+           text-gray-900 dark:text-white
+           placeholder-gray-500 dark:placeholder-gray-400
+           focus:ring-2 focus:ring-blue-500 focus:outline-none
+           transition-all duration-200;
+  }
+}

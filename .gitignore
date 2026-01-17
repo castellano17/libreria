@@ -1,0 +1,36 @@
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# Datos pesados (base de datos y portadas)
+data/
+*.db
+covers/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+ENV/
+
+# Node.js
+node_modules/
+dist/
+.npm
+*.log
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Docker
+*.log

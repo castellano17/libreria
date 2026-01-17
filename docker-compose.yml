@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    env_file:
+      - .env
+    environment:
+      - DB_PATH=/app/data/library.db
+      - COVERS_PATH=/app/data/covers
+      - LIBRARY_PATH=/library
+    volumes:
+      - ${DATA_PATH:-./data}:/app/data
+      - ${LIBRARY_PATH:-./biblioteca_libros}:/library:ro
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
