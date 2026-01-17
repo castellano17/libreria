@@ -13,7 +13,7 @@ services:
       - ${DATA_PATH:-./data}:/app/data
       - ${LIBRARY_PATH:-./biblioteca_libros}:/library:ro
     ports:
-      - "8000:8000"
+      - "8001:8000"
     restart: unless-stopped
 
   frontend:
