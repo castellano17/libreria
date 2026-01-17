@@ -48,6 +48,11 @@ def send_to_kindle(kindle_email: str, book_title: str, epub_path: str) -> dict:
 
         # Limpiar y validar el título del libro
         clean_title = clean_filename(book_title, file_path)
+        
+        # DEBUG: Agregar logs para ver qué está pasando
+        print(f"DEBUG - Título original: '{book_title}'")
+        print(f"DEBUG - Título limpio: '{clean_title}'")
+        print(f"DEBUG - Ruta archivo: '{epub_path}'")
 
         # Crear mensaje
         msg = MIMEMultipart()
@@ -64,9 +69,17 @@ def send_to_kindle(kindle_email: str, book_title: str, epub_path: str) -> dict:
             part = MIMEBase('application', 'epub+zip')
             part.set_payload(attachment.read())
             encoders.encode_base64(part)
+            
+            # Asegurar que el nombre del archivo sea válido
+            safe_filename = clean_title.replace(' ', '_').replace('/', '_').replace('\\', '_')
+            if not safe_filename:
+                safe_filename = file_path.stem
+            
+            print(f"DEBUG - Nombre archivo adjunto: '{safe_filename}.epub'")
+            
             part.add_header(
                 'Content-Disposition',
-                f'attachment; filename="{clean_title}.epub"'
+                f'attachment; filename="{safe_filename}.epub"'
             )
             msg.attach(part)
 
