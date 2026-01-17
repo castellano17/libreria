@@ -68,7 +68,7 @@ export default function Settings({
               personales
             </p>
             <a
-              href="https://www.amazon.com/hz/mycd/preferences"
+              href="https://www.amazon.com/myk"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
@@ -115,7 +115,7 @@ export default function Settings({
                 correos aprobados en Amazon.
               </p>
               <a
-                href="https://www.amazon.com/hz/mycd/preferences"
+                href="https://www.amazon.com/myk"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 mt-2 text-xs text-amber-800 dark:text-amber-200 hover:text-amber-900 dark:hover:text-amber-100 font-medium"
