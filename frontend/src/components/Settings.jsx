@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Settings({
   isOpen,
@@ -8,8 +8,27 @@ export default function Settings({
 }) {
   const [email, setEmail] = useState(kindleEmail || "");
   const [saved, setSaved] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  if (!isOpen) return null;
+  // Animación de entrada
+  useEffect(() => {
+    if (isOpen) {
+      requestAnimationFrame(() => setIsVisible(true));
+    }
+  }, [isOpen]);
+
+  // Animación de salida
+  const handleClose = () => {
+    setIsClosing(true);
+    setIsVisible(false);
+    setTimeout(() => {
+      setIsClosing(false);
+      onClose();
+    }, 200);
+  };
+
+  if (!isOpen && !isClosing) return null;
 
   const handleSave = () => {
     onSaveKindleEmail(email);
@@ -19,11 +38,15 @@ export default function Settings({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
+      className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-all duration-200 ${
+        isVisible ? "bg-black/70 backdrop-blur-sm" : "bg-black/0"
+      }`}
+      onClick={handleClose}
     >
       <div
-        className="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl"
+        className={`bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl transition-all duration-200 ${
+          isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-6">
@@ -31,7 +54,7 @@ export default function Settings({
             Configuración
           </h2>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
           >
             <svg

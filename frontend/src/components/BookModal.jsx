@@ -286,9 +286,9 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
               </div>
             </div>
 
-            {/* Descripción - oculta en móvil si es muy larga */}
+            {/* Descripción - con scroll interno y responsive */}
             {book?.description && (
-              <div className="mb-4 sm:mb-6 hidden sm:block">
+              <div className="mb-4 sm:mb-6">
                 <div className="flex items-center gap-2 mb-2">
                   <svg
                     className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400"
@@ -307,9 +307,17 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
                     Descripción
                   </h3>
                 </div>
-                <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 line-clamp-4 sm:line-clamp-6 pl-6 sm:pl-7">
-                  {book.description}
-                </p>
+                <div className="max-h-20 sm:max-h-32 overflow-y-auto pl-6 sm:pl-7">
+                  <div
+                    className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 prose prose-sm dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: book.description
+                        .replace(/<p>/g, "")
+                        .replace(/<\/p>/g, "<br><br>")
+                        .replace(/<br><br>$/, ""),
+                    }}
+                  />
+                </div>
               </div>
             )}
 
