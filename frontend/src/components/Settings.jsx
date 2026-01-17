@@ -67,6 +67,27 @@ export default function Settings({
               dispositivos → Preferencias → Configuración de documentos
               personales
             </p>
+            <a
+              href="https://www.amazon.com/hz/mycd/preferences"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 mt-2 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+            >
+              <svg
+                className="w-3 h-3"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                />
+              </svg>
+              Ir a configuración de Amazon Kindle
+            </a>
           </div>
 
           {/* Warning sobre correos aprobados */}
@@ -91,9 +112,32 @@ export default function Settings({
               <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
                 Para recibir libros debes agregar{" "}
                 <strong>librosbiblioteca35@gmail.com</strong> a tu lista de
-                correos aprobados en Amazon → Gestionar contenido y dispositivos
-                → Preferencias → Configuración de documentos personales → Lista
-                de correos aprobados.
+                correos aprobados en Amazon.
+              </p>
+              <a
+                href="https://www.amazon.com/hz/mycd/preferences"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 mt-2 text-xs text-amber-800 dark:text-amber-200 hover:text-amber-900 dark:hover:text-amber-100 font-medium"
+              >
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                  />
+                </svg>
+                Configurar correos aprobados en Amazon
+              </a>
+              <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                Ve a: Preferencias → Configuración de documentos personales →
+                Lista de correos aprobados
               </p>
             </div>
           </div>
