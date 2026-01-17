@@ -6,6 +6,7 @@ from email import encoders
 from pathlib import Path
 import os
 import re
+import unicodedata
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -16,6 +17,14 @@ SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_EMAIL = os.getenv("SMTP_EMAIL")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+
+
+def remove_accents(text: str) -> str:
+    """Elimina acentos y caracteres especiales para nombres de archivo."""
+    # Normalizar y eliminar acentos
+    text = unicodedata.normalize('NFD', text)
+    text = ''.join(char for char in text if unicodedata.category(char) != 'Mn')
+    return text
 
 
 def clean_filename(title: str, file_path: Path) -> str:
@@ -70,10 +79,10 @@ def send_to_kindle(kindle_email: str, book_title: str, epub_path: str) -> dict:
             part.set_payload(attachment.read())
             encoders.encode_base64(part)
             
-            # Asegurar que el nombre del archivo sea válido
-            safe_filename = clean_title.replace(' ', '_').replace('/', '_').replace('\\', '_')
+            # Asegurar que el nombre del archivo sea válido para Gmail/Kindle
+            safe_filename = remove_accents(clean_title).replace(' ', '_').replace('/', '_').replace('\\', '_')
             if not safe_filename:
-                safe_filename = file_path.stem
+                safe_filename = remove_accents(file_path.stem)
             
             print(f"DEBUG - Nombre archivo adjunto: '{safe_filename}.epub'")
             
