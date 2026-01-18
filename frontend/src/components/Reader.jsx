@@ -5,9 +5,18 @@ const getStorageKey = (bookId) => `book-progress-${bookId}`;
 
 const saveProgress = (bookId, cfi, percent) => {
   try {
-    localStorage.setItem(
-      getStorageKey(bookId),
-      JSON.stringify({ cfi, percent, timestamp: Date.now() }),
+    const progressData = {
+      cfi,
+      percent,
+      timestamp: Date.now(),
+      page: cfi, // Guardar también el CFI como referencia de página
+    };
+
+    localStorage.setItem(getStorageKey(bookId), JSON.stringify(progressData));
+
+    // Debug: confirmar que se está guardando
+    console.log(
+      `Progreso guardado: ${percent}% - CFI: ${cfi.substring(0, 50)}...`,
     );
   } catch (e) {
     console.warn("No se pudo guardar el progreso:", e);
@@ -157,8 +166,11 @@ export default function Reader({ book, onClose }) {
                   location.start.cfi,
                 );
                 const percent = Math.round(pct * 100);
-                setProgress(percent);
+
+                // Guardar progreso SIEMPRE, no solo cuando cambia el porcentaje
+                // Esto asegura que se guarde en cada página, incluso si el % no cambia
                 saveProgress(book.id, location.start.cfi, percent);
+                setProgress(percent);
               }
             });
           });

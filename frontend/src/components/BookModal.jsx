@@ -96,7 +96,7 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
     const shareData = {
       title: cleanTitle,
       text: `${cleanTitle} - ${book.author}`,
-      url: window.location.href,
+      url: window.location.origin, // Solo el dominio base, sin el título en la URL
     };
 
     // Usar Web Share API nativo SIEMPRE que esté disponible
@@ -116,7 +116,7 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
     }
 
     // Fallback: copiar al portapapeles SOLO si Web Share API no existe o falló
-    const fullShareText = `${cleanTitle} - ${book.author}\n${window.location.href}`;
+    const fullShareText = `${cleanTitle} - ${book.author}\n${window.location.origin}`;
     
     try {
       if (navigator.clipboard && window.isSecureContext) {
