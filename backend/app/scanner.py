@@ -73,7 +73,23 @@ class EPUBScanner:
             )
         except Exception as e:
             logger.error(f"Error procesando {epub_path}: {e}")
-            return None
+            # Crear metadata básica para archivos corruptos
+            try:
+                file_size = epub_path.stat().st_size
+                return BookMetadata(
+                    title=f"[CORRUPTO] {epub_path.stem}",
+                    author=epub_path.parent.name,
+                    file_path=str(epub_path),
+                    cover_path=None,
+                    description=f"Archivo EPUB corrupto o con errores: {str(e)[:200]}",
+                    language=None,
+                    publisher=None,
+                    genre="Archivo Corrupto",
+                    file_size=file_size,
+                )
+            except Exception:
+                logger.error(f"Error crítico con {epub_path}, saltando archivo")
+                return None
 
     def _get_metadata(self, book: epub.EpubBook, field: str) -> Optional[str]:
         try:
@@ -89,63 +105,81 @@ class EPUBScanner:
             cover_item = None
             
             # Método 1: Buscar en metadatos OPF por 'cover' content
-            for meta in book.get_metadata('OPF', 'cover'):
-                if meta and len(meta) > 1 and isinstance(meta[1], dict):
-                    cover_content = meta[1].get('content', '')
-                    if cover_content:
-                        # Buscar item que coincida con el content
-                        for item in book.get_items():
-                            if item.get_name() and cover_content in item.get_name():
-                                if item.media_type and 'image' in item.media_type:
-                                    cover_item = item
-                                    break
-                    break
+            try:
+                for meta in book.get_metadata('OPF', 'cover'):
+                    if meta and len(meta) > 1 and isinstance(meta[1], dict):
+                        cover_content = meta[1].get('content', '')
+                        if cover_content:
+                            # Buscar item que coincida con el content
+                            for item in book.get_items():
+                                if item.get_name() and cover_content in item.get_name():
+                                    if item.media_type and 'image' in item.media_type:
+                                        cover_item = item
+                                        break
+                        break
+            except Exception:
+                pass
             
             # Método 2: Buscar por ID de cover
             if not cover_item:
-                cover_id = None
-                for meta in book.get_metadata('OPF', 'cover'):
-                    if meta and len(meta) > 0:
-                        cover_id = meta[0] if isinstance(meta[0], str) else None
-                        break
-                
-                if cover_id:
-                    cover_item = book.get_item_with_id(cover_id)
+                try:
+                    cover_id = None
+                    for meta in book.get_metadata('OPF', 'cover'):
+                        if meta and len(meta) > 0:
+                            cover_id = meta[0] if isinstance(meta[0], str) else None
+                            break
+                    
+                    if cover_id:
+                        cover_item = book.get_item_with_id(cover_id)
+                except Exception:
+                    pass
             
             # Método 3: Buscar por nombre de archivo que contenga 'cover'
             if not cover_item:
-                for item in book.get_items():
-                    name = (item.get_name() or "").lower()
-                    if item.media_type and "image" in item.media_type:
-                        if "cover" in name or "portada" in name or "cubierta" in name:
-                            cover_item = item
-                            break
+                try:
+                    for item in book.get_items():
+                        name = (item.get_name() or "").lower()
+                        if item.media_type and "image" in item.media_type:
+                            if "cover" in name or "portada" in name or "cubierta" in name:
+                                cover_item = item
+                                break
+                except Exception:
+                    pass
             
             # Método 4: Buscar primera imagen grande (> 50KB)
             if not cover_item:
-                for item in book.get_items():
-                    if item.media_type and "image" in item.media_type:
-                        try:
-                            content = item.get_content()
-                            if len(content) > 50000:
-                                cover_item = item
-                                break
-                        except:
-                            pass
+                try:
+                    for item in book.get_items():
+                        if item.media_type and "image" in item.media_type:
+                            try:
+                                content = item.get_content()
+                                if len(content) > 50000:
+                                    cover_item = item
+                                    break
+                            except:
+                                pass
+                except Exception:
+                    pass
 
             if not cover_item:
                 return None
 
-            file_hash = hashlib.md5(str(epub_path).encode()).hexdigest()[:12]
-            cover_filename = f"{file_hash}.jpg"
-            cover_path = self.covers_dir / cover_filename
+            # Extraer y procesar la imagen
+            try:
+                file_hash = hashlib.md5(str(epub_path).encode()).hexdigest()[:12]
+                cover_filename = f"{file_hash}.jpg"
+                cover_path = self.covers_dir / cover_filename
 
-            img = Image.open(io.BytesIO(cover_item.get_content()))
-            img = img.convert("RGB")
-            img.thumbnail((300, 450), Image.Resampling.LANCZOS)
-            img.save(cover_path, "JPEG", quality=85, optimize=True)
+                img = Image.open(io.BytesIO(cover_item.get_content()))
+                img = img.convert("RGB")
+                img.thumbnail((300, 450), Image.Resampling.LANCZOS)
+                img.save(cover_path, "JPEG", quality=85, optimize=True)
 
-            return cover_filename
+                return cover_filename
+            except Exception as e:
+                logger.debug(f"Error procesando imagen de portada de {epub_path}: {e}")
+                return None
+                
         except Exception as e:
             logger.debug(f"No se pudo extraer portada de {epub_path}: {e}")
             return None
