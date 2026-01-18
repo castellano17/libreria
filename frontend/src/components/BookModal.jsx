@@ -93,61 +93,64 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
   };
 
   const handleShare = async () => {
-    const shareText = `${cleanTitle} - ${book.author}\n${window.location.href}`;
+    const shareText = `${cleanTitle} - ${book.author}`;
     const shareData = {
       title: cleanTitle,
-      text: `${cleanTitle} - ${book.author}`,
+      text: shareText,
       url: window.location.href,
     };
 
-    // Intentar Web Share API primero (móviles)
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare(shareData)
-    ) {
+    // Priorizar Web Share API nativo (opciones de compartir del navegador)
+    if (navigator.share) {
       try {
         await navigator.share(shareData);
-        setMessage({ type: "success", text: "Compartido exitosamente" });
+        // No mostrar mensaje si se comparte exitosamente, ya que el navegador maneja la UI
         return;
       } catch (err) {
-        if (err.name === "AbortError") return; // Usuario canceló
+        if (err.name === "AbortError") {
+          // Usuario canceló, no mostrar error
+          return;
+        }
         console.error("Error sharing:", err);
+        // Si falla Web Share API, continuar con fallback
       }
     }
 
-    // Fallback: copiar al portapapeles
+    // Fallback: copiar al portapapeles solo si Web Share API no está disponible
     try {
-      // Método moderno (requiere HTTPS)
+      const fullShareText = `${shareText}\n${window.location.href}`;
+      
       if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(shareText);
+        await navigator.clipboard.writeText(fullShareText);
         setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
       } else {
         // Método legacy para HTTP
         const textArea = document.createElement("textarea");
-        textArea.value = shareText;
+        textArea.value = fullShareText;
         textArea.style.position = "fixed";
         textArea.style.left = "-999999px";
         textArea.style.top = "-999999px";
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-
-        const successful = document.execCommand("copy");
+        
+        const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
-
+        
         if (successful) {
-          setMessage({
-            type: "success",
-            text: "Enlace copiado al portapapeles",
-          });
+          setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
         } else {
           throw new Error("execCommand failed");
         }
       }
     } catch (err) {
       console.error("Error copying to clipboard:", err);
-      // Último recurso: mostrar el texto para copiar manualmente
+      setMessage({ 
+        type: "info", 
+        text: `Copia este enlace: ${shareText}\n${window.location.href}` 
+      });
+    }
+  };
       setMessage({
         type: "info",
         text: `Copia este enlace: ${shareText}`,
