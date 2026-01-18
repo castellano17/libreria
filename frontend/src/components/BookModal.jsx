@@ -16,6 +16,10 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  // Limpiar título de prefijos no deseados
+  const cleanTitle =
+    book?.title?.replace(/^\[CORRUPTO\]\s*/, "") || book?.title;
+
   // Animación de entrada
   useEffect(() => {
     if (book) {
@@ -89,32 +93,65 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
   };
 
   const handleShare = async () => {
+    const shareText = `${cleanTitle} - ${book.author}\n${window.location.href}`;
     const shareData = {
-      title: book.title,
-      text: `${book.title} - ${book.author}`,
+      title: cleanTitle,
+      text: `${cleanTitle} - ${book.author}`,
       url: window.location.href,
     };
 
-    if (navigator.share) {
+    // Intentar Web Share API primero (móviles)
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare(shareData)
+    ) {
       try {
         await navigator.share(shareData);
         setMessage({ type: "success", text: "Compartido exitosamente" });
+        return;
       } catch (err) {
-        if (err.name !== "AbortError") {
-          console.error("Error sharing:", err);
-          setMessage({ type: "error", text: "Error al compartir" });
+        if (err.name === "AbortError") return; // Usuario canceló
+        console.error("Error sharing:", err);
+      }
+    }
+
+    // Fallback: copiar al portapapeles
+    try {
+      // Método moderno (requiere HTTPS)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareText);
+        setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
+      } else {
+        // Método legacy para HTTP
+        const textArea = document.createElement("textarea");
+        textArea.value = shareText;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+
+        if (successful) {
+          setMessage({
+            type: "success",
+            text: "Enlace copiado al portapapeles",
+          });
+        } else {
+          throw new Error("execCommand failed");
         }
       }
-    } else {
-      try {
-        await navigator.clipboard.writeText(
-          `${book.title} - ${book.author}\n${window.location.href}`,
-        );
-        setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
-      } catch (err) {
-        console.error("Error copying to clipboard:", err);
-        setMessage({ type: "error", text: "Error al copiar al portapapeles" });
-      }
+    } catch (err) {
+      console.error("Error copying to clipboard:", err);
+      // Último recurso: mostrar el texto para copiar manualmente
+      setMessage({
+        type: "info",
+        text: `Copia este enlace: ${shareText}`,
+      });
     }
   };
 
@@ -157,7 +194,7 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
           <div className="sm:w-1/3 bg-gray-100 dark:bg-gray-800 p-4 sm:p-6 flex items-center justify-center flex-shrink-0">
             <img
               src={coverUrl}
-              alt={book?.title}
+              alt={cleanTitle}
               className="max-h-48 sm:max-h-64 md:max-h-80 rounded-lg shadow-lg object-contain"
               onError={() => setImgError(true)}
             />
@@ -181,7 +218,7 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
                 />
               </svg>
               <h2 className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white line-clamp-2">
-                {book?.title}
+                {cleanTitle}
               </h2>
             </div>
 

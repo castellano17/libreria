@@ -13,6 +13,9 @@ const PLACEHOLDER_COVER =
 export default function BookCard({ book, onClick }) {
   const [imgError, setImgError] = useState(false);
 
+  // Limpiar título de prefijos no deseados
+  const cleanTitle = book.title?.replace(/^\[CORRUPTO\]\s*/, "") || book.title;
+
   const coverUrl =
     book.cover_path && !imgError
       ? `/covers/${book.cover_path}`
@@ -23,7 +26,7 @@ export default function BookCard({ book, onClick }) {
       <div className="aspect-[2/3] relative overflow-hidden bg-gray-100 dark:bg-gray-800">
         <img
           src={coverUrl}
-          alt={`Portada de ${book.title}`}
+          alt={`Portada de ${cleanTitle}`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           onError={() => setImgError(true)}
@@ -47,7 +50,7 @@ export default function BookCard({ book, onClick }) {
             />
           </svg>
           <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight line-clamp-2">
-            {book.title}
+            {cleanTitle}
           </h3>
         </div>
         <div className="flex items-center gap-2">
