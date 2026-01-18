@@ -35,15 +35,28 @@ export default function Filters({ onFilterChange, activeFilters }) {
   };
 
   const clearFilters = () => {
-    onFilterChange({ genre: null, language: null, publisher: null });
+    onFilterChange({
+      genre: null,
+      language: null,
+      publisher: null,
+      recent: null,
+      corrupted: null,
+    });
   };
 
   const hasActiveFilters =
-    activeFilters.genre || activeFilters.language || activeFilters.publisher;
+    activeFilters.genre ||
+    activeFilters.language ||
+    activeFilters.publisher ||
+    activeFilters.recent ||
+    activeFilters.corrupted;
+
   const activeCount = [
     activeFilters.genre,
     activeFilters.language,
     activeFilters.publisher,
+    activeFilters.recent,
+    activeFilters.corrupted,
   ].filter(Boolean).length;
 
   // Mapeo de códigos de idioma a nombres
@@ -105,6 +118,46 @@ export default function Filters({ onFilterChange, activeFilters }) {
       <div
         className={`${showFilters ? "block" : "hidden"} sm:flex flex-wrap items-center gap-2 sm:gap-3 space-y-2 sm:space-y-0`}
       >
+        {/* Libros Recientes */}
+        <div className="flex-1 min-w-[140px] sm:min-w-[160px] sm:max-w-[200px]">
+          <select
+            value={activeFilters.recent || ""}
+            onChange={(e) => handleChange("recent", e.target.value)}
+            className="w-full appearance-none px-3 py-2 pr-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-0 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: "right 0.5rem center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "1.25em 1.25em",
+            }}
+          >
+            <option value="">Todos los libros</option>
+            <option value="today">Hoy</option>
+            <option value="week">Esta semana</option>
+            <option value="month">Este mes</option>
+          </select>
+        </div>
+
+        {/* Estado de archivos */}
+        <div className="flex-1 min-w-[140px] sm:min-w-[160px] sm:max-w-[200px]">
+          <select
+            value={activeFilters.corrupted || ""}
+            onChange={(e) => handleChange("corrupted", e.target.value)}
+            className="w-full appearance-none px-3 py-2 pr-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-0 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: "right 0.5rem center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "1.25em 1.25em",
+            }}
+          >
+            <option value="">Todos los estados</option>
+            <option value="corrupted">Archivos corruptos</option>
+            <option value="no_cover">Sin portada</option>
+            <option value="no_description">Sin descripción</option>
+          </select>
+        </div>
+
         {/* Género */}
         <div className="flex-1 min-w-[140px] sm:min-w-[160px] sm:max-w-[200px]">
           <select

@@ -5,34 +5,63 @@ const PLACEHOLDER_COVER =
   encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
     <rect fill="#1f2937" width="200" height="300"/>
-    <text x="100" y="150" text-anchor="middle" fill="#6b7280" font-family="system-ui" font-size="14">Sin portada</text>
+    <text x="100" y="140" text-anchor="middle" fill="#6b7280" font-family="system-ui" font-size="14">📚</text>
+    <text x="100" y="160" text-anchor="middle" fill="#6b7280" font-family="system-ui" font-size="12">Sin portada</text>
+  </svg>
+`);
+
+const CORRUPTED_COVER =
+  "data:image/svg+xml," +
+  encodeURIComponent(`
+  <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
+    <rect fill="#dc2626" width="200" height="300"/>
+    <text x="100" y="140" text-anchor="middle" fill="#fca5a5" font-family="system-ui" font-size="14">⚠️</text>
+    <text x="100" y="160" text-anchor="middle" fill="#fca5a5" font-family="system-ui" font-size="12">Corrupto</text>
   </svg>
 `);
 
 export default function BookCard({ book, onClick }) {
   const [imgError, setImgError] = useState(false);
-  const coverUrl =
-    book.cover_path && !imgError
-      ? `/covers/${book.cover_path}`
-      : PLACEHOLDER_COVER;
+
+  const isCorrupted =
+    book.title?.startsWith("[CORRUPTO]") || book.genre === "Archivo Corrupto";
+
+  const coverUrl = (() => {
+    if (isCorrupted) return CORRUPTED_COVER;
+    if (book.cover_path && !imgError) return `/covers/${book.cover_path}`;
+    return PLACEHOLDER_COVER;
+  })();
+
+  // Limpiar título si es corrupto
+  const displayTitle = isCorrupted
+    ? book.title.replace("[CORRUPTO] ", "")
+    : book.title;
 
   return (
-    <article className="book-card group" onClick={onClick}>
+    <article
+      className={`book-card group ${isCorrupted ? "corrupted" : ""}`}
+      onClick={onClick}
+    >
       <div className="aspect-[2/3] relative overflow-hidden bg-gray-100 dark:bg-gray-800">
         <img
           src={coverUrl}
-          alt={`Portada de ${book.title}`}
+          alt={`Portada de ${displayTitle}`}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           onError={() => setImgError(true)}
         />
+        {isCorrupted && (
+          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+            ⚠️ Corrupto
+          </div>
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
 
       <div className="p-4">
         <div className="flex items-start gap-2 mb-1">
           <svg
-            className="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0"
+            className={`w-4 h-4 mt-0.5 flex-shrink-0 ${isCorrupted ? "text-red-500" : "text-blue-500"}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -44,8 +73,10 @@ export default function BookCard({ book, onClick }) {
               d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
             />
           </svg>
-          <h3 className="font-semibold text-gray-900 dark:text-white text-sm leading-tight line-clamp-2">
-            {book.title}
+          <h3
+            className={`font-semibold text-sm leading-tight line-clamp-2 ${isCorrupted ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"}`}
+          >
+            {displayTitle}
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -66,6 +97,26 @@ export default function BookCard({ book, onClick }) {
             {book.author}
           </p>
         </div>
+
+        {/* Indicadores de estado */}
+        <div className="flex items-center gap-2 mt-2 text-xs">
+          {!book.cover_path && !isCorrupted && (
+            <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 px-2 py-1 rounded-full">
+              Sin portada
+            </span>
+          )}
+          {!book.description && !isCorrupted && (
+            <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
+              Sin descripción
+            </span>
+          )}
+          {isCorrupted && (
+            <span className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-full">
+              Archivo corrupto
+            </span>
+          )}
+        </div>
+
         {book.file_size && (
           <div className="flex items-center gap-2 mt-2">
             <svg

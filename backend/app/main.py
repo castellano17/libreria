@@ -60,8 +60,12 @@ def get_books(
     genre: str = Query(None, max_length=200),
     language: str = Query(None, max_length=50),
     publisher: str = Query(None, max_length=200),
+    recent: str = Query(None),  # today, week, month
+    corrupted: str = Query(None),  # corrupted, no_cover, no_description
     db: Session = Depends(get_db),
 ):
+    from datetime import datetime, timedelta
+    
     offset = (page - 1) * page_size
     query = db.query(Book)
     count_query = db.query(func.count(Book.id))
@@ -90,8 +94,53 @@ def get_books(
         query = query.filter(Book.publisher.ilike(f"%{publisher}%"))
         count_query = count_query.filter(Book.publisher.ilike(f"%{publisher}%"))
 
+    # Filtro de libros recientes
+    if recent:
+        now = datetime.now()
+        if recent == "today":
+            start_date = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        elif recent == "week":
+            start_date = now - timedelta(days=7)
+        elif recent == "month":
+            start_date = now - timedelta(days=30)
+        else:
+            start_date = None
+            
+        if start_date:
+            query = query.filter(Book.created_at >= start_date)
+            count_query = count_query.filter(Book.created_at >= start_date)
+
+    # Filtro de estado de archivos
+    if corrupted:
+        if corrupted == "corrupted":
+            corrupted_filter = or_(
+                Book.title.ilike("[CORRUPTO]%"),
+                Book.genre == "Archivo Corrupto"
+            )
+            query = query.filter(corrupted_filter)
+            count_query = count_query.filter(corrupted_filter)
+        elif corrupted == "no_cover":
+            no_cover_filter = or_(
+                Book.cover_path == None,
+                Book.cover_path == ""
+            )
+            query = query.filter(no_cover_filter)
+            count_query = count_query.filter(no_cover_filter)
+        elif corrupted == "no_description":
+            no_desc_filter = or_(
+                Book.description == None,
+                Book.description == ""
+            )
+            query = query.filter(no_desc_filter)
+            count_query = count_query.filter(no_desc_filter)
+
     total = count_query.scalar()
-    books = query.order_by(Book.author, Book.title).offset(offset).limit(page_size).all()
+    
+    # Ordenar por fecha de creación si es filtro reciente, sino por autor/título
+    if recent:
+        books = query.order_by(Book.created_at.desc()).offset(offset).limit(page_size).all()
+    else:
+        books = query.order_by(Book.author, Book.title).offset(offset).limit(page_size).all()
 
     return PaginatedBooks(
         items=books,

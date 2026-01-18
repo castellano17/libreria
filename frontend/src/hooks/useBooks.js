@@ -15,6 +15,8 @@ export function useBooks() {
     genre: null,
     language: null,
     publisher: null,
+    recent: null,
+    corrupted: null,
   });
   const [stats, setStats] = useState(null);
 
@@ -34,6 +36,10 @@ export function useBooks() {
           params.append("language", activeFilters.language);
         if (activeFilters?.publisher)
           params.append("publisher", activeFilters.publisher);
+        if (activeFilters?.recent)
+          params.append("recent", activeFilters.recent);
+        if (activeFilters?.corrupted)
+          params.append("corrupted", activeFilters.corrupted);
 
         const response = await fetch(`${API_BASE}/books?${params}`);
         if (!response.ok) throw new Error("Error al cargar libros");
