@@ -29,6 +29,10 @@ def remove_accents(text: str) -> str:
 
 def clean_filename(title: str, file_path: Path) -> str:
     """Limpia y valida el nombre del archivo para Kindle."""
+    # Primero limpiar prefijos problemáticos
+    if title:
+        title = title.replace("[CORRUPTO] ", "").replace("[CORRUPTO]", "").strip()
+    
     if not title or title.strip() == "" or title.lower() in ["noname", "none", "null"]:
         # Usar el nombre del archivo sin extensión como fallback
         title = file_path.stem

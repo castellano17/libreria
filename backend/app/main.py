@@ -172,9 +172,14 @@ def download_book(book_id: int, db: Session = Depends(get_db)):
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
     
+    # Limpiar título de prefijos no deseados
+    clean_title = book.title.replace("[CORRUPTO] ", "").replace("[CORRUPTO]", "").strip()
+    if not clean_title:
+        clean_title = file_path.stem
+    
     return FileResponse(
         path=file_path,
-        filename=f"{book.title}.epub",
+        filename=f"{clean_title}.epub",
         media_type="application/epub+zip"
     )
 
