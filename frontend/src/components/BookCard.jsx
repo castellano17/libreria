@@ -4,9 +4,9 @@ const PLACEHOLDER_COVER =
   "data:image/svg+xml," +
   encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
-    <rect fill="#1f2937" width="200" height="300"/>
-    <text x="100" y="140" text-anchor="middle" fill="#6b7280" font-family="system-ui" font-size="14">📚</text>
-    <text x="100" y="160" text-anchor="middle" fill="#6b7280" font-family="system-ui" font-size="12">Sin portada</text>
+    <rect fill="#374151" width="200" height="300"/>
+    <text x="100" y="140" text-anchor="middle" fill="#9ca3af" font-family="system-ui" font-size="16">📚</text>
+    <text x="100" y="160" text-anchor="middle" fill="#9ca3af" font-family="system-ui" font-size="11">Sin portada</text>
   </svg>
 `);
 
@@ -14,9 +14,9 @@ const CORRUPTED_COVER =
   "data:image/svg+xml," +
   encodeURIComponent(`
   <svg xmlns="http://www.w3.org/2000/svg" width="200" height="300" viewBox="0 0 200 300">
-    <rect fill="#dc2626" width="200" height="300"/>
-    <text x="100" y="140" text-anchor="middle" fill="#fca5a5" font-family="system-ui" font-size="14">⚠️</text>
-    <text x="100" y="160" text-anchor="middle" fill="#fca5a5" font-family="system-ui" font-size="12">Corrupto</text>
+    <rect fill="#374151" width="200" height="300"/>
+    <text x="100" y="140" text-anchor="middle" fill="#fbbf24" font-family="system-ui" font-size="16">📖</text>
+    <text x="100" y="160" text-anchor="middle" fill="#fbbf24" font-family="system-ui" font-size="11">Procesando</text>
   </svg>
 `);
 
@@ -39,7 +39,7 @@ export default function BookCard({ book, onClick }) {
 
   return (
     <article
-      className={`book-card group ${isCorrupted ? "corrupted" : ""}`}
+      className={`book-card group ${isCorrupted ? "processing" : ""}`}
       onClick={onClick}
     >
       <div className="aspect-[2/3] relative overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -51,8 +51,8 @@ export default function BookCard({ book, onClick }) {
           onError={() => setImgError(true)}
         />
         {isCorrupted && (
-          <div className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-            ⚠️ Corrupto
+          <div className="absolute top-2 right-2 bg-amber-500 text-white text-xs px-2 py-1 rounded-full">
+            📖 Procesando
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -61,7 +61,7 @@ export default function BookCard({ book, onClick }) {
       <div className="p-4">
         <div className="flex items-start gap-2 mb-1">
           <svg
-            className={`w-4 h-4 mt-0.5 flex-shrink-0 ${isCorrupted ? "text-red-500" : "text-blue-500"}`}
+            className={`w-4 h-4 mt-0.5 flex-shrink-0 ${isCorrupted ? "text-amber-500" : "text-blue-500"}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -74,7 +74,7 @@ export default function BookCard({ book, onClick }) {
             />
           </svg>
           <h3
-            className={`font-semibold text-sm leading-tight line-clamp-2 ${isCorrupted ? "text-red-600 dark:text-red-400" : "text-gray-900 dark:text-white"}`}
+            className={`font-semibold text-sm leading-tight line-clamp-2 ${isCorrupted ? "text-amber-600 dark:text-amber-400" : "text-gray-900 dark:text-white"}`}
           >
             {displayTitle}
           </h3>
@@ -98,21 +98,21 @@ export default function BookCard({ book, onClick }) {
           </p>
         </div>
 
-        {/* Indicadores de estado */}
+        {/* Indicadores de estado - más sutiles */}
         <div className="flex items-center gap-2 mt-2 text-xs">
           {!book.cover_path && !isCorrupted && (
-            <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 px-2 py-1 rounded-full">
-              Sin portada
+            <span className="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-full">
+              📚 Sin portada
             </span>
           )}
           {!book.description && !isCorrupted && (
             <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
-              Sin descripción
+              📝 Sin descripción
             </span>
           )}
           {isCorrupted && (
-            <span className="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-full">
-              Archivo corrupto
+            <span className="bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-full">
+              📖 Procesando metadatos
             </span>
           )}
         </div>
