@@ -98,12 +98,23 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
+        setMessage({ type: "success", text: "Compartido exitosamente" });
       } catch (err) {
-        if (err.name !== "AbortError") console.error("Error sharing:", err);
+        if (err.name !== "AbortError") {
+          console.error("Error sharing:", err);
+          setMessage({ type: "error", text: "Error al compartir" });
+        }
       }
     } else {
-      navigator.clipboard.writeText(`${book.title} - ${book.author}`);
-      setMessage({ type: "success", text: "Copiado al portapapeles" });
+      try {
+        await navigator.clipboard.writeText(
+          `${book.title} - ${book.author}\n${window.location.href}`,
+        );
+        setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
+      } catch (err) {
+        console.error("Error copying to clipboard:", err);
+        setMessage({ type: "error", text: "Error al copiar al portapapeles" });
+      }
     }
   };
 

@@ -152,7 +152,6 @@ export default function Filters({ onFilterChange, activeFilters }) {
             }}
           >
             <option value="">Todos los estados</option>
-            <option value="corrupted">Procesando metadatos</option>
             <option value="no_cover">Sin portada</option>
             <option value="no_description">Sin descripción</option>
           </select>

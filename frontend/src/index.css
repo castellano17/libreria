@@ -16,11 +16,6 @@
            hover:-translate-y-1 cursor-pointer;
   }
 
-  .book-card.processing {
-    @apply border border-amber-200 dark:border-amber-800 
-           bg-amber-50/30 dark:bg-amber-950/10;
-  }
-
   .search-input {
     @apply w-full px-5 py-3.5 rounded-xl border-0 
            bg-gray-100 dark:bg-gray-800 

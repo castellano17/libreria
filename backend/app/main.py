@@ -112,14 +112,7 @@ def get_books(
 
     # Filtro de estado de archivos
     if corrupted:
-        if corrupted == "corrupted":
-            corrupted_filter = or_(
-                Book.title.ilike("[CORRUPTO]%"),
-                Book.genre == "Archivo Corrupto"
-            )
-            query = query.filter(corrupted_filter)
-            count_query = count_query.filter(corrupted_filter)
-        elif corrupted == "no_cover":
+        if corrupted == "no_cover":
             no_cover_filter = or_(
                 Book.cover_path == None,
                 Book.cover_path == ""
@@ -133,6 +126,14 @@ def get_books(
             )
             query = query.filter(no_desc_filter)
             count_query = count_query.filter(no_desc_filter)
+    else:
+        # Por defecto, ocultar archivos corruptos de la vista principal
+        not_corrupted_filter = ~or_(
+            Book.title.ilike("[CORRUPTO]%"),
+            Book.genre == "Archivo Corrupto"
+        )
+        query = query.filter(not_corrupted_filter)
+        count_query = count_query.filter(not_corrupted_filter)
 
     total = count_query.scalar()
     
