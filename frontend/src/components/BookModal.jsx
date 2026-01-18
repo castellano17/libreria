@@ -93,38 +93,36 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
   };
 
   const handleShare = async () => {
-    const shareText = `${cleanTitle} - ${book.author}`;
     const shareData = {
       title: cleanTitle,
-      text: shareText,
+      text: `${cleanTitle} - ${book.author}`,
       url: window.location.href,
     };
 
-    // Priorizar Web Share API nativo (opciones de compartir del navegador)
+    // Usar Web Share API nativo SIEMPRE que esté disponible
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-        // No mostrar mensaje si se comparte exitosamente, ya que el navegador maneja la UI
+        // Éxito - no mostrar mensaje, el navegador maneja la UI
         return;
       } catch (err) {
         if (err.name === "AbortError") {
-          // Usuario canceló, no mostrar error
+          // Usuario canceló - no hacer nada
           return;
         }
-        console.error("Error sharing:", err);
-        // Si falla Web Share API, continuar con fallback
+        // Si hay error, continuar con fallback
+        console.error("Error with Web Share API:", err);
       }
     }
 
-    // Fallback: copiar al portapapeles solo si Web Share API no está disponible
+    // Fallback: copiar al portapapeles SOLO si Web Share API no existe o falló
+    const fullShareText = `${cleanTitle} - ${book.author}\n${window.location.href}`;
+    
     try {
-      const fullShareText = `${shareText}\n${window.location.href}`;
-      
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(fullShareText);
-        setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
       } else {
-        // Método legacy para HTTP
+        // Método legacy
         const textArea = document.createElement("textarea");
         textArea.value = fullShareText;
         textArea.style.position = "fixed";
@@ -137,17 +135,17 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
         const successful = document.execCommand('copy');
         document.body.removeChild(textArea);
         
-        if (successful) {
-          setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
-        } else {
+        if (!successful) {
           throw new Error("execCommand failed");
         }
       }
+      
+      setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
     } catch (err) {
       console.error("Error copying to clipboard:", err);
       setMessage({ 
         type: "info", 
-        text: `Copia este enlace: ${shareText}\n${window.location.href}` 
+        text: `Copia manualmente: ${fullShareText}` 
       });
     }
   };
