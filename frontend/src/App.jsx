@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
 import Filters from "./components/Filters";
@@ -10,6 +11,9 @@ import Reader from "./components/Reader";
 import { useBooks, useScanStatus, useSettings } from "./hooks/useBooks";
 
 export default function App() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const {
     books,
     loading,
@@ -32,6 +36,36 @@ export default function App() {
   const [readingBook, setReadingBook] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
+  // Detectar si estamos en una ruta de libro
+  useEffect(() => {
+    const path = location.pathname;
+    const bookMatch = path.match(/^\/book\/(\d+)$/);
+
+    if (bookMatch) {
+      const bookId = parseInt(bookMatch[1]);
+      // Buscar el libro por ID
+      fetchBookById(bookId);
+    }
+  }, [location.pathname]);
+
+  // Función para obtener un libro por ID
+  const fetchBookById = async (bookId) => {
+    try {
+      const response = await fetch(`/api/books/${bookId}`);
+      if (response.ok) {
+        const book = await response.json();
+        setSelectedBook(book);
+      } else {
+        console.error("Libro no encontrado");
+        // Redirigir a la página principal si el libro no existe
+        navigate("/", { replace: true });
+      }
+    } catch (error) {
+      console.error("Error al obtener el libro:", error);
+      navigate("/", { replace: true });
+    }
+  };
+
   // Mostrar botón scroll cuando se baja
   useEffect(() => {
     const handleScroll = () => {
@@ -47,6 +81,14 @@ export default function App() {
 
   const handleBookClick = (book) => {
     setSelectedBook(book);
+    // Actualizar la URL sin recargar la página
+    navigate(`/book/${book.id}`, { replace: false });
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBook(null);
+    // Volver a la página principal
+    navigate("/", { replace: false });
   };
 
   const handleRead = (book) => {
@@ -126,7 +168,7 @@ export default function App() {
       {selectedBook && (
         <BookModal
           book={selectedBook}
-          onClose={() => setSelectedBook(null)}
+          onClose={handleCloseModal}
           onRead={handleRead}
           kindleEmail={kindleEmail}
         />
