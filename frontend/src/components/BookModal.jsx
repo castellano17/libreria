@@ -117,7 +117,7 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
 
     // Fallback: copiar al portapapeles SOLO si Web Share API no existe o falló
     const fullShareText = `${cleanTitle} - ${book.author}\n${window.location.origin}`;
-    
+
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(fullShareText);
@@ -131,27 +131,21 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
         document.body.appendChild(textArea);
         textArea.focus();
         textArea.select();
-        
-        const successful = document.execCommand('copy');
+
+        const successful = document.execCommand("copy");
         document.body.removeChild(textArea);
-        
+
         if (!successful) {
           throw new Error("execCommand failed");
         }
       }
-      
+
       setMessage({ type: "success", text: "Enlace copiado al portapapeles" });
     } catch (err) {
       console.error("Error copying to clipboard:", err);
-      setMessage({ 
-        type: "info", 
-        text: `Copia manualmente: ${fullShareText}` 
-      });
-    }
-  };
       setMessage({
         type: "info",
-        text: `Copia este enlace: ${shareText}`,
+        text: `Copia manualmente: ${fullShareText}`,
       });
     }
   };
