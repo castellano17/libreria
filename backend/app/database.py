@@ -29,7 +29,7 @@ def get_db():
 def migrate_db():
     """Ejecuta migraciones manuales necesarias."""
     with engine.connect() as conn:
-        # Verificar si la columna download_count existe
+        # Verificar si las columnas existen
         try:
             result = conn.execute(text("PRAGMA table_info(books)"))
             columns = [row[1] for row in result.fetchall()]
@@ -41,6 +41,14 @@ def migrate_db():
                 print("Columna download_count agregada exitosamente")
             else:
                 print("Columna download_count ya existe")
+                
+            if 'kindle_sends' not in columns:
+                print("Agregando columna kindle_sends...")
+                conn.execute(text("ALTER TABLE books ADD COLUMN kindle_sends INTEGER DEFAULT 0 NOT NULL"))
+                conn.commit()
+                print("Columna kindle_sends agregada exitosamente")
+            else:
+                print("Columna kindle_sends ya existe")
                 
         except Exception as e:
             print(f"Error en migración: {e}")

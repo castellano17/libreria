@@ -51,10 +51,20 @@ export default function Header({
                     {stats.total_books.toLocaleString()} libros ·{" "}
                     {stats.total_authors.toLocaleString()} autores ·{" "}
                     {stats.total_size_gb} GB
+                    {stats.total_interactions > 0 && (
+                      <>
+                        {" "}
+                        · {stats.total_interactions.toLocaleString()}{" "}
+                        interacciones
+                      </>
+                    )}
                   </span>
                   <span className="xs:hidden">
                     {stats.total_books.toLocaleString()} · {stats.total_size_gb}{" "}
                     GB
+                    {stats.total_interactions > 0 && (
+                      <> · {stats.total_interactions.toLocaleString()}</>
+                    )}
                   </span>
                 </p>
               )}

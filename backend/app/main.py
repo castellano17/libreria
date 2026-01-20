@@ -142,16 +142,16 @@ def get_books(
     # Ordenar por popularidad si se especifica
     if popular:
         if popular == "week":
-            # Más descargados en la última semana (simulado por ahora con download_count)
-            books = query.filter(Book.download_count > 0).order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+            # Más populares en la última semana (suma de descargas + envíos a Kindle)
+            books = query.filter((Book.download_count + Book.kindle_sends) > 0).order_by((Book.download_count + Book.kindle_sends).desc()).offset(offset).limit(page_size).all()
         elif popular == "month":
-            # Más descargados en el último mes
-            books = query.filter(Book.download_count > 0).order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+            # Más populares en el último mes
+            books = query.filter((Book.download_count + Book.kindle_sends) > 0).order_by((Book.download_count + Book.kindle_sends).desc()).offset(offset).limit(page_size).all()
         elif popular == "all_time":
-            # Más descargados de todos los tiempos
-            books = query.order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+            # Más populares de todos los tiempos
+            books = query.order_by((Book.download_count + Book.kindle_sends).desc()).offset(offset).limit(page_size).all()
         else:
-            books = query.order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+            books = query.order_by((Book.download_count + Book.kindle_sends).desc()).offset(offset).limit(page_size).all()
     # Ordenar por fecha de creación si es filtro reciente, sino por autor/título
     elif recent:
         books = query.order_by(Book.created_at.desc()).offset(offset).limit(page_size).all()
@@ -186,7 +186,7 @@ def download_book(book_id: int, db: Session = Depends(get_db)):
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
     
-    # Incrementar contador de descargas
+    # Incrementar contador de descargas directas
     book.download_count = (book.download_count or 0) + 1
     db.commit()
     
@@ -218,8 +218,8 @@ def send_to_kindle(book_id: int, data: dict, db: Session = Depends(get_db)):
     result = send_email(email, book.title, book.file_path)
     
     if result["success"]:
-        # Incrementar contador de descargas también para envíos a Kindle
-        book.download_count = (book.download_count or 0) + 1
+        # Incrementar contador de envíos a Kindle
+        book.kindle_sends = (book.kindle_sends or 0) + 1
         db.commit()
         return {"message": "Enviado a Kindle correctamente"}
     else:
@@ -332,11 +332,16 @@ def get_stats(db: Session = Depends(get_db)):
     total_books = db.query(func.count(Book.id)).scalar() or 0
     total_authors = db.query(func.count(func.distinct(Book.author))).scalar() or 0
     total_size = db.query(func.sum(Book.file_size)).scalar() or 0
+    total_downloads = db.query(func.sum(Book.download_count)).scalar() or 0
+    total_kindle_sends = db.query(func.sum(Book.kindle_sends)).scalar() or 0
 
     return {
         "total_books": total_books,
         "total_authors": total_authors,
         "total_size_gb": round(total_size / (1024**3), 2),
+        "total_downloads": total_downloads,
+        "total_kindle_sends": total_kindle_sends,
+        "total_interactions": total_downloads + total_kindle_sends,
     }
 
 
