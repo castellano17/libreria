@@ -47,24 +47,24 @@ export default function Header({
               </h1>
               {stats && (
                 <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 truncate">
-                  <span className="hidden xs:inline">
+                  <span className="hidden sm:inline">
                     {stats.total_books.toLocaleString()} libros ·{" "}
                     {stats.total_authors.toLocaleString()} autores ·{" "}
                     {stats.total_size_gb} GB
-                    {stats.total_interactions > 0 && (
+                    {stats.total_downloads > 0 && (
+                      <> · {stats.total_downloads.toLocaleString()} descargas</>
+                    )}
+                    {stats.total_kindle_sends > 0 && (
                       <>
                         {" "}
-                        · {stats.total_interactions.toLocaleString()}{" "}
-                        interacciones
+                        · {stats.total_kindle_sends.toLocaleString()} enviados a
+                        Kindle
                       </>
                     )}
                   </span>
-                  <span className="xs:hidden">
+                  <span className="sm:hidden">
                     {stats.total_books.toLocaleString()} · {stats.total_size_gb}{" "}
                     GB
-                    {stats.total_interactions > 0 && (
-                      <> · {stats.total_interactions.toLocaleString()}</>
-                    )}
                   </span>
                 </p>
               )}
