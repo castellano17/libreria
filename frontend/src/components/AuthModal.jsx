@@ -12,17 +12,26 @@ export default function AuthModal({ isOpen, onClose }) {
 
   // Cerrar modal automáticamente cuando el usuario se loguea
   useEffect(() => {
-    if (user && isOpen) {
+    if (user && isOpen && loading) {
+      // Mantener el loading un poco más para que se carguen los datos del usuario
       setTimeout(() => {
-        onClose();
-        // Limpiar el formulario
-        setEmail("");
-        setPassword("");
-        setMessage(null);
         setLoading(false);
-      }, 1000);
+        setMessage({
+          type: "success",
+          text: "¡Sesión iniciada correctamente!",
+        });
+
+        // Cerrar el modal después de mostrar el mensaje de éxito
+        setTimeout(() => {
+          onClose();
+          // Limpiar el formulario
+          setEmail("");
+          setPassword("");
+          setMessage(null);
+        }, 800);
+      }, 500); // Dar tiempo para que se carguen los datos
     }
-  }, [user, isOpen, onClose]);
+  }, [user, isOpen, loading, onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,9 +50,9 @@ export default function AuthModal({ isOpen, onClose }) {
         if (isLogin) {
           setMessage({
             type: "success",
-            text: "¡Bienvenido! Iniciando sesión...",
+            text: "Verificando credenciales...",
           });
-          // No setear loading a false aquí, se hará cuando se cierre el modal
+          // El loading se mantendrá activo hasta que el useEffect detecte que el usuario está logueado
         } else {
           setMessage({
             type: "success",
@@ -72,7 +81,19 @@ export default function AuthModal({ isOpen, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl relative">
+        {/* Loading Overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-10 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-3"></div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                {isLogin ? "Iniciando sesión..." : "Creando cuenta..."}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-bold text-gray-900 dark:text-white">
@@ -138,7 +159,7 @@ export default function AuthModal({ isOpen, onClose }) {
                   : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
               }`}
             >
-              {message.type === "success" && loading && (
+              {message.type === "success" && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
               )}
               {message.text}
