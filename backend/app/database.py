@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 import os
 from dotenv import load_dotenv
@@ -26,5 +26,26 @@ def get_db():
         db.close()
 
 
+def migrate_db():
+    """Ejecuta migraciones manuales necesarias."""
+    with engine.connect() as conn:
+        # Verificar si la columna download_count existe
+        try:
+            result = conn.execute(text("PRAGMA table_info(books)"))
+            columns = [row[1] for row in result.fetchall()]
+            
+            if 'download_count' not in columns:
+                print("Agregando columna download_count...")
+                conn.execute(text("ALTER TABLE books ADD COLUMN download_count INTEGER DEFAULT 0 NOT NULL"))
+                conn.commit()
+                print("Columna download_count agregada exitosamente")
+            else:
+                print("Columna download_count ya existe")
+                
+        except Exception as e:
+            print(f"Error en migración: {e}")
+
+
 def init_db():
     Base.metadata.create_all(bind=engine)
+    migrate_db()
