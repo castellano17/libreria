@@ -102,7 +102,7 @@ export default function BookModal({
   };
 
   const handleShare = async () => {
-    // Crear URL limpia con ID del libro
+    // Crear URL limpia SOLO con ID del libro (sin título)
     const bookUrl = `${window.location.origin}/book/${book.id}`;
 
     const shareData = {
