@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { AuthProvider } from "./hooks/useAuth";
+import { AuthProvider, useAuth } from "./hooks/useAuth";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
 import Filters from "./components/Filters";
@@ -10,12 +10,15 @@ import BookModal from "./components/BookModal";
 import Settings from "./components/Settings";
 import Reader from "./components/Reader";
 import AuthModal from "./components/AuthModal";
-import { useBooks, useScanStatus, useSettings } from "./hooks/useBooks";
+import { useBooks, useScanStatus } from "./hooks/useBooks";
 import { useSupabaseFavorites } from "./hooks/useSupabaseFavorites";
+import { useUserSettings } from "./hooks/useUserSettings";
+import { useReadingProgress } from "./hooks/useReadingProgress";
 
 function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, loading: authLoading } = useAuth();
 
   const {
     books,
@@ -32,8 +35,9 @@ function AppContent() {
     handleFilterChange,
   } = useBooks();
   const { status: scanStatus, startScan, cancelScan } = useScanStatus();
-  const { kindleEmail, saveKindleEmail } = useSettings();
+  const { settings, saveKindleEmail } = useUserSettings();
   const { favorites, toggleFavorite } = useSupabaseFavorites();
+  const { progress, updateProgress, getBookProgress } = useReadingProgress();
 
   const [selectedBook, setSelectedBook] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
@@ -100,6 +104,74 @@ function AppContent() {
     setSelectedBook(null);
     setReadingBook(book);
   };
+
+  // Mostrar loading mientras se verifica la autenticación
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Cargando...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Si no hay usuario logueado, mostrar pantalla de login
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+        <Header
+          stats={stats}
+          scanStatus={scanStatus}
+          onStartScan={startScan}
+          onCancelScan={cancelScan}
+          onOpenSettings={() => setShowSettings(true)}
+          onOpenAuth={() => setShowAuth(true)}
+        />
+
+        <main className="max-w-4xl mx-auto px-4 py-16 text-center">
+          <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg p-8">
+            <div className="mb-6">
+              <svg
+                className="w-16 h-16 mx-auto text-blue-500 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
+              </svg>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                Bienvenido a tu Biblioteca
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 text-lg">
+                Accede a miles de libros digitales
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-gray-700 dark:text-gray-300">
+                Para acceder a la biblioteca necesitas iniciar sesión
+              </p>
+              <button
+                onClick={() => setShowAuth(true)}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium transition-colors"
+              >
+                Iniciar Sesión
+              </button>
+            </div>
+          </div>
+        </main>
+
+        <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
@@ -178,7 +250,7 @@ function AppContent() {
           book={selectedBook}
           onClose={handleCloseModal}
           onRead={handleRead}
-          kindleEmail={kindleEmail}
+          kindleEmail={settings.kindleEmail}
           favorites={favorites}
           onToggleFavorite={toggleFavorite}
         />
@@ -191,7 +263,7 @@ function AppContent() {
       <Settings
         isOpen={showSettings}
         onClose={() => setShowSettings(false)}
-        kindleEmail={kindleEmail}
+        kindleEmail={settings.kindleEmail}
         onSaveKindleEmail={saveKindleEmail}
       />
 

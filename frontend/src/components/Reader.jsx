@@ -1,36 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-
-// Funciones para guardar/cargar progreso en localStorage
-const getStorageKey = (bookId) => `book-progress-${bookId}`;
-
-const saveProgress = (bookId, cfi, percent) => {
-  try {
-    const progressData = {
-      cfi,
-      percent,
-      timestamp: Date.now(),
-      page: cfi, // Guardar también el CFI como referencia de página
-    };
-
-    localStorage.setItem(getStorageKey(bookId), JSON.stringify(progressData));
-
-    // Debug: confirmar que se está guardando
-    console.log(
-      `Progreso guardado: ${percent}% - CFI: ${cfi.substring(0, 50)}...`,
-    );
-  } catch (e) {
-    console.warn("No se pudo guardar el progreso:", e);
-  }
-};
-
-const loadProgress = (bookId) => {
-  try {
-    const data = localStorage.getItem(getStorageKey(bookId));
-    return data ? JSON.parse(data) : null;
-  } catch (e) {
-    return null;
-  }
-};
+import { useReadingProgress } from "../hooks/useReadingProgress";
 
 export default function Reader({ book, onClose }) {
   const viewerRef = useRef(null);
@@ -46,6 +15,9 @@ export default function Reader({ book, onClose }) {
   const [savedProgress, setSavedProgress] = useState(null);
   const [showResumePrompt, setShowResumePrompt] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Hook para manejar progreso de lectura
+  const { updateProgress, getBookProgress } = useReadingProgress();
 
   const themes = {
     light: { bg: "#ffffff", text: "#1a1a1a" },
@@ -67,9 +39,14 @@ export default function Reader({ book, onClose }) {
 
     const loadBook = async () => {
       try {
-        const saved = loadProgress(book.id);
-        if (saved && saved.percent > 1) {
-          setSavedProgress(saved);
+        // Cargar progreso usando el hook
+        const bookProgress = getBookProgress(book.id);
+        if (bookProgress && bookProgress.percentage > 1) {
+          setSavedProgress({
+            percent: bookProgress.percentage,
+            cfi: bookProgress.currentPage || null, // El CFI se guarda como currentPage
+            timestamp: Date.now(),
+          });
           setShowResumePrompt(true);
         }
 
@@ -167,9 +144,14 @@ export default function Reader({ book, onClose }) {
                 );
                 const percent = Math.round(pct * 100);
 
-                // Guardar progreso SIEMPRE, no solo cuando cambia el porcentaje
-                // Esto asegura que se guarde en cada página, incluso si el % no cambia
-                saveProgress(book.id, location.start.cfi, percent);
+                // Guardar progreso usando el hook
+                // Guardamos el CFI como currentPage y calculamos totalPages como 100 para el porcentaje
+                updateProgress(book.id, location.start.cfi, 100).catch(
+                  (err) => {
+                    console.warn("Error saving progress:", err);
+                  },
+                );
+
                 setProgress(percent);
               }
             });
