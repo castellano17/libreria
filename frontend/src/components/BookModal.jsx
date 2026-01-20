@@ -106,8 +106,6 @@ export default function BookModal({
     const bookUrl = `${window.location.origin}/book/${book.id}`;
 
     const shareData = {
-      title: cleanTitle,
-      text: `${cleanTitle} - ${book.author}`,
       url: bookUrl,
     };
 
@@ -128,7 +126,7 @@ export default function BookModal({
     }
 
     // Fallback: copiar al portapapeles SOLO si Web Share API no existe o falló
-    const fullShareText = `${cleanTitle} - ${book.author}\n${bookUrl}`;
+    const fullShareText = bookUrl;
 
     try {
       if (navigator.clipboard && window.isSecureContext) {
