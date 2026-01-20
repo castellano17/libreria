@@ -13,15 +13,13 @@ export default function AuthModal({ isOpen, onClose }) {
   // Cerrar modal automáticamente cuando el usuario se loguea
   useEffect(() => {
     if (user && isOpen) {
-      // Cuando el usuario se loguea exitosamente, cerrar el modal
-      setTimeout(() => {
-        setLoading(false);
-        onClose();
-        // Limpiar el formulario
-        setEmail("");
-        setPassword("");
-        setMessage(null);
-      }, 1500); // Dar tiempo para mostrar el éxito
+      // Cerrar inmediatamente cuando se detecta que el usuario está logueado
+      onClose();
+      // Limpiar el formulario
+      setEmail("");
+      setPassword("");
+      setMessage(null);
+      setLoading(false);
     }
   }, [user, isOpen, onClose]);
 
