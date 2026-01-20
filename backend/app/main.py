@@ -119,6 +119,7 @@ def get_books(
         )
         query = query.filter(not_corrupted_filter)
         count_query = count_query.filter(not_corrupted_filter)
+        count_query = count_query.filter(not_corrupted_filter)
 
     # Filtro de estado de archivos
     if corrupted:
