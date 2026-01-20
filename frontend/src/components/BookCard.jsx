@@ -33,11 +33,6 @@ export default function BookCard({
     onToggleFavorite(book.id);
   };
 
-  const coverUrl =
-    book.cover_path && !imgError
-      ? `/covers/${book.cover_path}`
-      : PLACEHOLDER_COVER;
-
   return (
     <article className="book-card group" onClick={onClick}>
       <div className="aspect-[2/3] relative overflow-hidden bg-gray-100 dark:bg-gray-800">
