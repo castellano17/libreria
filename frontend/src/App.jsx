@@ -20,6 +20,7 @@ function AppContent() {
   const location = useLocation();
   const { user, loading: authLoading } = useAuth();
 
+  const { favorites, toggleFavorite } = useSupabaseFavorites();
   const {
     books,
     loading,
@@ -33,10 +34,9 @@ function AppContent() {
     handlePageSizeChange,
     handleSearch,
     handleFilterChange,
-  } = useBooks();
+  } = useBooks(favorites);
   const { status: scanStatus, startScan, cancelScan } = useScanStatus();
   const { settings, saveKindleEmail } = useUserSettings();
-  const { favorites, toggleFavorite } = useSupabaseFavorites();
   const { progress, updateProgress, getBookProgress } = useReadingProgress();
 
   // Debug: log cuando cambian los settings

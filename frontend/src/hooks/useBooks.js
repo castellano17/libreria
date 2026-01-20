@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 
 const API_BASE = "/api";
 
-export function useBooks() {
+export function useBooks(favorites = []) {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -21,10 +21,6 @@ export function useBooks() {
     favorites: null,
   });
   const [stats, setStats] = useState(null);
-  const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem("favorites");
-    return saved ? JSON.parse(saved) : [];
-  });
 
   const fetchBooks = useCallback(
     async (pageNum, searchQuery, size, activeFilters) => {
@@ -81,13 +77,10 @@ export function useBooks() {
   );
 
   const toggleFavorite = useCallback((bookId) => {
-    setFavorites((prev) => {
-      const newFavorites = prev.includes(bookId)
-        ? prev.filter((id) => id !== bookId)
-        : [...prev, bookId];
-      localStorage.setItem("favorites", JSON.stringify(newFavorites));
-      return newFavorites;
-    });
+    // Esta función ya no se usa aquí, se maneja en useSupabaseFavorites
+    console.warn(
+      "toggleFavorite called in useBooks - this should be handled by useSupabaseFavorites",
+    );
   }, []);
 
   const fetchStats = useCallback(async () => {
@@ -152,12 +145,10 @@ export function useBooks() {
     total,
     stats,
     filters,
-    favorites,
     handlePageChange,
     handlePageSizeChange,
     handleSearch,
     handleFilterChange,
-    toggleFavorite,
     search,
     refreshStats: fetchStats,
   };
@@ -207,17 +198,4 @@ export function useScanStatus() {
   }, [checkStatus]);
 
   return { status, scanning, startScan, cancelScan };
-}
-
-export function useSettings() {
-  const [kindleEmail, setKindleEmail] = useState(() => {
-    return localStorage.getItem("kindleEmail") || "";
-  });
-
-  const saveKindleEmail = useCallback((email) => {
-    localStorage.setItem("kindleEmail", email);
-    setKindleEmail(email);
-  }, []);
-
-  return { kindleEmail, saveKindleEmail };
 }
