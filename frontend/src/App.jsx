@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { AuthProvider } from "./hooks/useAuth";
 import Header from "./components/Header";
 import SearchBar from "./components/SearchBar";
 import Filters from "./components/Filters";
@@ -8,9 +9,11 @@ import Pagination from "./components/Pagination";
 import BookModal from "./components/BookModal";
 import Settings from "./components/Settings";
 import Reader from "./components/Reader";
+import AuthModal from "./components/AuthModal";
 import { useBooks, useScanStatus, useSettings } from "./hooks/useBooks";
+import { useSupabaseFavorites } from "./hooks/useSupabaseFavorites";
 
-export default function App() {
+function AppContent() {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -23,18 +26,18 @@ export default function App() {
     total,
     stats,
     filters,
-    favorites,
     handlePageChange,
     handlePageSizeChange,
     handleSearch,
     handleFilterChange,
-    toggleFavorite,
   } = useBooks();
   const { status: scanStatus, startScan, cancelScan } = useScanStatus();
   const { kindleEmail, saveKindleEmail } = useSettings();
+  const { favorites, toggleFavorite } = useSupabaseFavorites();
 
   const [selectedBook, setSelectedBook] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const [readingBook, setReadingBook] = useState(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
@@ -106,6 +109,7 @@ export default function App() {
         onStartScan={startScan}
         onCancelScan={cancelScan}
         onOpenSettings={() => setShowSettings(true)}
+        onOpenAuth={() => setShowAuth(true)}
       />
 
       <main className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
@@ -180,6 +184,9 @@ export default function App() {
         />
       )}
 
+      {/* Modal de autenticación */}
+      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+
       {/* Configuración */}
       <Settings
         isOpen={showSettings}
@@ -193,5 +200,13 @@ export default function App() {
         <Reader book={readingBook} onClose={() => setReadingBook(null)} />
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

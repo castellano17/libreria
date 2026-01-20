@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Header({
   stats,
@@ -6,6 +7,7 @@ export default function Header({
   onStartScan,
   onCancelScan,
   onOpenSettings,
+  onOpenAuth,
 }) {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== "undefined") {
@@ -13,6 +15,8 @@ export default function Header({
     }
     return false;
   });
+
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -73,6 +77,57 @@ export default function Header({
 
           {/* Controles */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+            {/* Usuario/Auth */}
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span className="text-xs text-green-600 dark:text-green-400 truncate max-w-24">
+                    {user.email}
+                  </span>
+                </div>
+                <button
+                  onClick={signOut}
+                  className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                  aria-label="Cerrar sesión"
+                >
+                  <svg
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                    />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={onOpenAuth}
+                className="px-2.5 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium rounded-lg bg-blue-500 hover:bg-blue-600 text-white transition-colors flex items-center gap-1.5"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Iniciar Sesión</span>
+                <span className="sm:hidden">Login</span>
+              </button>
+            )}
             {/* Estado del escaneo - compacto en móvil */}
             {isScanning && (
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
