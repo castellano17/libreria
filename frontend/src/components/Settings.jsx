@@ -11,6 +11,12 @@ export default function Settings({
   const [isVisible, setIsVisible] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
+  // Debug: log cuando cambia el kindleEmail
+  useEffect(() => {
+    console.log("Settings component - kindleEmail prop changed:", kindleEmail);
+    setEmail(kindleEmail || "");
+  }, [kindleEmail]);
+
   // Animación de entrada
   useEffect(() => {
     if (isOpen) {

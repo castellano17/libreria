@@ -11,11 +11,15 @@ export function useUserSettings() {
 
   // Cargar configuraciones del usuario
   useEffect(() => {
+    console.log("useUserSettings effect triggered, user:", user);
     if (user) {
+      console.log("User exists, loading settings...");
       loadUserSettings();
     } else {
+      console.log("No user, loading from localStorage");
       // Si no hay usuario, cargar desde localStorage
       const localKindleEmail = localStorage.getItem("kindleEmail");
+      console.log("Local kindle email:", localKindleEmail);
       setSettings({
         kindleEmail: localKindleEmail || "",
       });

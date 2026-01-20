@@ -9,11 +9,15 @@ export function useSupabaseFavorites() {
 
   // Cargar favoritos del usuario
   useEffect(() => {
+    console.log("useSupabaseFavorites effect triggered, user:", user);
     if (user) {
+      console.log("User exists, loading favorites...");
       loadFavorites();
     } else {
+      console.log("No user, loading favorites from localStorage");
       // Si no hay usuario, cargar desde localStorage
       const localFavorites = localStorage.getItem("favorites");
+      console.log("Local favorites:", localFavorites);
       setFavorites(localFavorites ? JSON.parse(localFavorites) : []);
     }
   }, [user]);

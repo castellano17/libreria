@@ -39,6 +39,11 @@ function AppContent() {
   const { favorites, toggleFavorite } = useSupabaseFavorites();
   const { progress, updateProgress, getBookProgress } = useReadingProgress();
 
+  // Debug: log cuando cambian los settings
+  useEffect(() => {
+    console.log("App component - settings changed:", settings);
+  }, [settings]);
+
   const [selectedBook, setSelectedBook] = useState(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
