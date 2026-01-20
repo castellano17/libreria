@@ -50,21 +50,46 @@ export function useBooks(favorites = []) {
 
         const data = await response.json();
 
-        // Filtrar favoritos en el frontend si es necesario
-        let filteredBooks = data.items;
-        if (activeFilters?.favorites === "only") {
-          filteredBooks = data.items.filter((book) =>
-            favorites.includes(book.id),
-          );
+        // Si es filtro de favoritos, necesitamos obtener los libros específicos
+        if (activeFilters?.favorites === "only" && favorites.length > 0) {
+          console.log("Fetching specific favorite books:", favorites);
+          // Hacer consultas individuales para cada libro favorito
+          const favoriteBooks = [];
+          for (const bookId of favorites) {
+            try {
+              const bookResponse = await fetch(`${API_BASE}/books/${bookId}`);
+              if (bookResponse.ok) {
+                const book = await bookResponse.json();
+                favoriteBooks.push(book);
+              }
+            } catch (err) {
+              console.warn(`Error fetching favorite book ${bookId}:`, err);
+            }
+          }
+
+          console.log("Fetched favorite books:", favoriteBooks);
+          setBooks(favoriteBooks);
+          setTotalPages(1); // Solo una página para favoritos
+          setTotal(favoriteBooks.length);
+          setPage(1);
+          return;
+        } else if (
+          activeFilters?.favorites === "only" &&
+          favorites.length === 0
+        ) {
+          // No hay favoritos
+          console.log("No favorites found");
+          setBooks([]);
+          setTotalPages(0);
+          setTotal(0);
+          setPage(1);
+          return;
         }
 
-        setBooks(filteredBooks);
+        // Para otros filtros, usar la lógica normal
+        setBooks(data.items);
         setTotalPages(data.total_pages);
-        setTotal(
-          activeFilters?.favorites === "only"
-            ? filteredBooks.length
-            : data.total,
-        );
+        setTotal(data.total);
         setPage(pageNum);
       } catch (err) {
         setError(err.message);
