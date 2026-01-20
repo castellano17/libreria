@@ -218,6 +218,9 @@ def send_to_kindle(book_id: int, data: dict, db: Session = Depends(get_db)):
     result = send_email(email, book.title, book.file_path)
     
     if result["success"]:
+        # Incrementar contador de descargas también para envíos a Kindle
+        book.download_count = (book.download_count or 0) + 1
+        db.commit()
         return {"message": "Enviado a Kindle correctamente"}
     else:
         raise HTTPException(status_code=500, detail=result.get("error", "Error al enviar"))
