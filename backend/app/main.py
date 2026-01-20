@@ -330,11 +330,17 @@ def get_scan_status():
 
 @app.get("/api/stats")
 def get_stats(db: Session = Depends(get_db)):
-    total_books = db.query(func.count(Book.id)).scalar() or 0
-    total_authors = db.query(func.count(func.distinct(Book.author))).scalar() or 0
-    total_size = db.query(func.sum(Book.file_size)).scalar() or 0
-    total_downloads = db.query(func.sum(Book.download_count)).scalar() or 0
-    total_kindle_sends = db.query(func.sum(Book.kindle_sends)).scalar() or 0
+    # Filtro para excluir libros corruptos (igual que en /api/books)
+    not_corrupted_filter = ~or_(
+        Book.title.ilike("[CORRUPTO]%"),
+        Book.genre == "Archivo Corrupto"
+    )
+    
+    total_books = db.query(func.count(Book.id)).filter(not_corrupted_filter).scalar() or 0
+    total_authors = db.query(func.count(func.distinct(Book.author))).filter(not_corrupted_filter).scalar() or 0
+    total_size = db.query(func.sum(Book.file_size)).filter(not_corrupted_filter).scalar() or 0
+    total_downloads = db.query(func.sum(Book.download_count)).filter(not_corrupted_filter).scalar() or 0
+    total_kindle_sends = db.query(func.sum(Book.kindle_sends)).filter(not_corrupted_filter).scalar() or 0
 
     return {
         "total_books": total_books,
