@@ -12,26 +12,18 @@ export default function AuthModal({ isOpen, onClose }) {
 
   // Cerrar modal automáticamente cuando el usuario se loguea
   useEffect(() => {
-    if (user && isOpen && loading) {
-      // Mantener el loading un poco más para que se carguen los datos del usuario
+    if (user && isOpen) {
+      // Cuando el usuario se loguea exitosamente, cerrar el modal
       setTimeout(() => {
         setLoading(false);
-        setMessage({
-          type: "success",
-          text: "¡Sesión iniciada correctamente!",
-        });
-
-        // Cerrar el modal después de mostrar el mensaje de éxito
-        setTimeout(() => {
-          onClose();
-          // Limpiar el formulario
-          setEmail("");
-          setPassword("");
-          setMessage(null);
-        }, 800);
-      }, 500); // Dar tiempo para que se carguen los datos
+        onClose();
+        // Limpiar el formulario
+        setEmail("");
+        setPassword("");
+        setMessage(null);
+      }, 1500); // Dar tiempo para mostrar el éxito
     }
-  }, [user, isOpen, loading, onClose]);
+  }, [user, isOpen, onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,19 +39,15 @@ export default function AuthModal({ isOpen, onClose }) {
         setMessage({ type: "error", text: error.message });
         setLoading(false);
       } else {
-        if (isLogin) {
-          setMessage({
-            type: "success",
-            text: "Verificando credenciales...",
-          });
-          // El loading se mantendrá activo hasta que el useEffect detecte que el usuario está logueado
-        } else {
+        if (!isLogin) {
+          // Solo para registro, mostrar mensaje y quitar loading
           setMessage({
             type: "success",
             text: "Cuenta creada. Revisa tu email para confirmar.",
           });
           setLoading(false);
         }
+        // Para login, el useEffect se encargará de cerrar el modal cuando user cambie
       }
     } catch (err) {
       setMessage({ type: "error", text: "Error de conexión" });
@@ -102,7 +90,7 @@ export default function AuthModal({ isOpen, onClose }) {
           <button
             onClick={handleClose}
             disabled={loading}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 text-white"
           >
             <svg
               className="w-5 h-5"
