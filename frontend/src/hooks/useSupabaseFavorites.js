@@ -21,6 +21,7 @@ export function useSupabaseFavorites() {
   const loadFavorites = async () => {
     if (!user) return;
 
+    console.log("Loading favorites for user:", user.id);
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -28,9 +29,12 @@ export function useSupabaseFavorites() {
         .select("book_id")
         .eq("user_id", user.id);
 
+      console.log("Favorites query result:", { data, error });
+
       if (error) throw error;
 
       const favoriteIds = data.map((item) => item.book_id);
+      console.log("Favorites loaded:", favoriteIds);
       setFavorites(favoriteIds);
     } catch (error) {
       console.error("Error loading favorites:", error);
@@ -41,6 +45,7 @@ export function useSupabaseFavorites() {
 
   const toggleFavorite = async (bookId) => {
     if (!user) {
+      console.log("No user logged in, saving favorite to localStorage");
       // Fallback a localStorage si no hay usuario
       setFavorites((prev) => {
         const newFavorites = prev.includes(bookId)
@@ -52,10 +57,12 @@ export function useSupabaseFavorites() {
       return;
     }
 
+    console.log("Toggling favorite for user:", user.id, "book:", bookId);
     const isFavorite = favorites.includes(bookId);
 
     try {
       if (isFavorite) {
+        console.log("Removing from favorites");
         // Remover de favoritos
         const { error } = await supabase
           .from("user_favorites")
@@ -66,7 +73,9 @@ export function useSupabaseFavorites() {
         if (error) throw error;
 
         setFavorites((prev) => prev.filter((id) => id !== bookId));
+        console.log("Favorite removed successfully");
       } else {
+        console.log("Adding to favorites");
         // Agregar a favoritos
         const { error } = await supabase
           .from("user_favorites")
@@ -75,6 +84,7 @@ export function useSupabaseFavorites() {
         if (error) throw error;
 
         setFavorites((prev) => [...prev, bookId]);
+        console.log("Favorite added successfully");
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);

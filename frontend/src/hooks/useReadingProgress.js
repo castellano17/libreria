@@ -55,6 +55,7 @@ export function useReadingProgress() {
     const percentage = totalPages > 0 ? (currentPage / totalPages) * 100 : 0;
 
     if (!user) {
+      console.log("No user logged in, saving progress to localStorage");
       // Fallback a localStorage si no hay usuario
       const newProgress = {
         ...progress,
@@ -69,6 +70,14 @@ export function useReadingProgress() {
       return;
     }
 
+    console.log(
+      "Updating reading progress for user:",
+      user.id,
+      "book:",
+      bookId,
+      "progress:",
+      percentage + "%",
+    );
     try {
       const { error } = await supabase.from("user_reading_progress").upsert(
         {
@@ -84,8 +93,12 @@ export function useReadingProgress() {
         },
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error updating progress:", error);
+        throw error;
+      }
 
+      console.log("Reading progress updated successfully");
       setProgress((prev) => ({
         ...prev,
         [bookId]: {

@@ -65,59 +65,76 @@ ALTER TABLE user_lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_list_books ENABLE ROW LEVEL SECURITY;
 
 -- Políticas de seguridad para user_favorites
+DROP POLICY IF EXISTS "Users can view their own favorites" ON user_favorites;
 CREATE POLICY "Users can view their own favorites" ON user_favorites
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own favorites" ON user_favorites;
 CREATE POLICY "Users can insert their own favorites" ON user_favorites
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own favorites" ON user_favorites;
 CREATE POLICY "Users can delete their own favorites" ON user_favorites
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Políticas de seguridad para user_downloads
+DROP POLICY IF EXISTS "Users can view their own downloads" ON user_downloads;
 CREATE POLICY "Users can view their own downloads" ON user_downloads
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own downloads" ON user_downloads;
 CREATE POLICY "Users can insert their own downloads" ON user_downloads
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
 -- Políticas de seguridad para user_settings
+DROP POLICY IF EXISTS "Users can view their own settings" ON user_settings;
 CREATE POLICY "Users can view their own settings" ON user_settings
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own settings" ON user_settings;
 CREATE POLICY "Users can insert their own settings" ON user_settings
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own settings" ON user_settings;
 CREATE POLICY "Users can update their own settings" ON user_settings
   FOR UPDATE USING (auth.uid() = user_id);
 
 -- Políticas de seguridad para user_reading_progress
+DROP POLICY IF EXISTS "Users can view their own reading progress" ON user_reading_progress;
 CREATE POLICY "Users can view their own reading progress" ON user_reading_progress
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own reading progress" ON user_reading_progress;
 CREATE POLICY "Users can insert their own reading progress" ON user_reading_progress
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own reading progress" ON user_reading_progress;
 CREATE POLICY "Users can update their own reading progress" ON user_reading_progress
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own reading progress" ON user_reading_progress;
 CREATE POLICY "Users can delete their own reading progress" ON user_reading_progress
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Políticas de seguridad para user_lists
+DROP POLICY IF EXISTS "Users can view their own lists" ON user_lists;
 CREATE POLICY "Users can view their own lists" ON user_lists
   FOR SELECT USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can insert their own lists" ON user_lists;
 CREATE POLICY "Users can insert their own lists" ON user_lists
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can update their own lists" ON user_lists;
 CREATE POLICY "Users can update their own lists" ON user_lists
   FOR UPDATE USING (auth.uid() = user_id);
 
+DROP POLICY IF EXISTS "Users can delete their own lists" ON user_lists;
 CREATE POLICY "Users can delete their own lists" ON user_lists
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Políticas de seguridad para user_list_books
+DROP POLICY IF EXISTS "Users can view books in their own lists" ON user_list_books;
 CREATE POLICY "Users can view books in their own lists" ON user_list_books
   FOR SELECT USING (
     EXISTS (
@@ -127,6 +144,7 @@ CREATE POLICY "Users can view books in their own lists" ON user_list_books
     )
   );
 
+DROP POLICY IF EXISTS "Users can insert books in their own lists" ON user_list_books;
 CREATE POLICY "Users can insert books in their own lists" ON user_list_books
   FOR INSERT WITH CHECK (
     EXISTS (
@@ -136,6 +154,7 @@ CREATE POLICY "Users can insert books in their own lists" ON user_list_books
     )
   );
 
+DROP POLICY IF EXISTS "Users can delete books from their own lists" ON user_list_books;
 CREATE POLICY "Users can delete books from their own lists" ON user_list_books
   FOR DELETE USING (
     EXISTS (

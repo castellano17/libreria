@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 export default function AuthModal({ isOpen, onClose }) {
@@ -8,7 +8,21 @@ export default function AuthModal({ isOpen, onClose }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, user } = useAuth();
+
+  // Cerrar modal automáticamente cuando el usuario se loguea
+  useEffect(() => {
+    if (user && isOpen) {
+      setTimeout(() => {
+        onClose();
+        // Limpiar el formulario
+        setEmail("");
+        setPassword("");
+        setMessage(null);
+        setLoading(false);
+      }, 1000);
+    }
+  }, [user, isOpen, onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,24 +36,35 @@ export default function AuthModal({ isOpen, onClose }) {
 
       if (error) {
         setMessage({ type: "error", text: error.message });
+        setLoading(false);
       } else {
         if (isLogin) {
           setMessage({
             type: "success",
-            text: "Sesión iniciada correctamente",
+            text: "¡Bienvenido! Iniciando sesión...",
           });
-          setTimeout(() => onClose(), 1000);
+          // No setear loading a false aquí, se hará cuando se cierre el modal
         } else {
           setMessage({
             type: "success",
             text: "Cuenta creada. Revisa tu email para confirmar.",
           });
+          setLoading(false);
         }
       }
     } catch (err) {
       setMessage({ type: "error", text: "Error de conexión" });
-    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!loading) {
+      onClose();
+      // Limpiar el formulario al cerrar
+      setEmail("");
+      setPassword("");
+      setMessage(null);
     }
   };
 
@@ -54,8 +79,9 @@ export default function AuthModal({ isOpen, onClose }) {
             {isLogin ? "Iniciar Sesión" : "Crear Cuenta"}
           </h2>
           <button
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={handleClose}
+            disabled={loading}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
             <svg
               className="w-5 h-5"
@@ -83,7 +109,8 @@ export default function AuthModal({ isOpen, onClose }) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               required
             />
           </div>
@@ -96,7 +123,8 @@ export default function AuthModal({ isOpen, onClose }) {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              disabled={loading}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
               required
               minLength={6}
             />
@@ -104,12 +132,15 @@ export default function AuthModal({ isOpen, onClose }) {
 
           {message && (
             <div
-              className={`p-3 rounded-lg text-sm ${
+              className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
                 message.type === "success"
                   ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
                   : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
               }`}
             >
+              {message.type === "success" && loading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
+              )}
               {message.text}
             </div>
           )}
@@ -117,10 +148,15 @@ export default function AuthModal({ isOpen, onClose }) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+            className="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
           >
+            {loading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            )}
             {loading
-              ? "Procesando..."
+              ? isLogin
+                ? "Iniciando sesión..."
+                : "Creando cuenta..."
               : isLogin
                 ? "Iniciar Sesión"
                 : "Crear Cuenta"}
@@ -130,7 +166,8 @@ export default function AuthModal({ isOpen, onClose }) {
             <button
               type="button"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-blue-500 hover:text-blue-600 transition-colors"
+              disabled={loading}
+              className="text-sm text-blue-500 hover:text-blue-600 transition-colors disabled:opacity-50"
             >
               {isLogin
                 ? "¿No tienes cuenta? Regístrate"

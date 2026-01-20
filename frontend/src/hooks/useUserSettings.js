@@ -25,6 +25,7 @@ export function useUserSettings() {
   const loadUserSettings = async () => {
     if (!user) return;
 
+    console.log("Loading user settings for user:", user.id);
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -32,6 +33,8 @@ export function useUserSettings() {
         .select("kindle_email")
         .eq("user_id", user.id)
         .single();
+
+      console.log("User settings query result:", { data, error });
 
       if (error && error.code !== "PGRST116") {
         // PGRST116 = no rows returned, es normal si es la primera vez
@@ -41,6 +44,7 @@ export function useUserSettings() {
       setSettings({
         kindleEmail: data?.kindle_email || "",
       });
+      console.log("Settings loaded:", data?.kindle_email || "");
     } catch (error) {
       console.error("Error loading user settings:", error);
       // Fallback a localStorage
@@ -55,12 +59,19 @@ export function useUserSettings() {
 
   const saveKindleEmail = async (email) => {
     if (!user) {
+      console.log("No user logged in, saving to localStorage");
       // Fallback a localStorage si no hay usuario
       localStorage.setItem("kindleEmail", email);
       setSettings((prev) => ({ ...prev, kindleEmail: email }));
       return;
     }
 
+    console.log(
+      "Saving kindle email to Supabase for user:",
+      user.id,
+      "email:",
+      email,
+    );
     setLoading(true);
     try {
       const { error } = await supabase.from("user_settings").upsert(
@@ -74,8 +85,12 @@ export function useUserSettings() {
         },
       );
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error saving kindle email:", error);
+        throw error;
+      }
 
+      console.log("Kindle email saved successfully to Supabase");
       setSettings((prev) => ({ ...prev, kindleEmail: email }));
     } catch (error) {
       console.error("Error saving kindle email:", error);
