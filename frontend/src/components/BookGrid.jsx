@@ -1,6 +1,12 @@
 import BookCard from "./BookCard";
 
-export default function BookGrid({ books, loading, onBookClick }) {
+export default function BookGrid({
+  books,
+  loading,
+  onBookClick,
+  favorites,
+  onToggleFavorite,
+}) {
   if (!books.length && !loading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-gray-500 dark:text-gray-400">
@@ -33,6 +39,8 @@ export default function BookGrid({ books, loading, onBookClick }) {
             key={`${book.id}-${index}`}
             book={book}
             onClick={() => onBookClick(book)}
+            favorites={favorites}
+            onToggleFavorite={onToggleFavorite}
           />
         ))}
       </div>

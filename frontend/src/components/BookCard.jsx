@@ -10,11 +10,28 @@ const PLACEHOLDER_COVER =
   </svg>
 `);
 
-export default function BookCard({ book, onClick }) {
+export default function BookCard({
+  book,
+  onClick,
+  favorites,
+  onToggleFavorite,
+}) {
   const [imgError, setImgError] = useState(false);
 
   // Limpiar título de prefijos no deseados
   const cleanTitle = book.title?.replace(/^\[CORRUPTO\]\s*/, "") || book.title;
+
+  const isFavorite = favorites.includes(book.id);
+
+  const coverUrl =
+    book.cover_path && !imgError
+      ? `/covers/${book.cover_path}`
+      : PLACEHOLDER_COVER;
+
+  const handleFavoriteClick = (e) => {
+    e.stopPropagation();
+    onToggleFavorite(book.id);
+  };
 
   const coverUrl =
     book.cover_path && !imgError
@@ -32,6 +49,31 @@ export default function BookCard({ book, onClick }) {
           onError={() => setImgError(true)}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+        {/* Botón de favorito */}
+        <button
+          onClick={handleFavoriteClick}
+          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/20 hover:bg-black/40 transition-colors z-10"
+          aria-label={
+            isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"
+          }
+        >
+          <svg
+            className={`w-4 h-4 transition-colors ${
+              isFavorite ? "text-red-500 fill-current" : "text-white"
+            }`}
+            fill={isFavorite ? "currentColor" : "none"}
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+            />
+          </svg>
+        </button>
       </div>
 
       <div className="p-4">
@@ -103,6 +145,29 @@ export default function BookCard({ book, onClick }) {
             </svg>
             <p className="text-xs text-gray-400 dark:text-gray-500">
               {(book.file_size / (1024 * 1024)).toFixed(1)} MB
+            </p>
+          </div>
+        )}
+
+        {/* Contador de descargas */}
+        {book.download_count > 0 && (
+          <div className="flex items-center gap-2 mt-2">
+            <svg
+              className="w-4 h-4 text-gray-400 flex-shrink-0"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            <p className="text-xs text-gray-400 dark:text-gray-500">
+              {book.download_count}{" "}
+              {book.download_count === 1 ? "descarga" : "descargas"}
             </p>
           </div>
         )}

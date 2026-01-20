@@ -62,6 +62,7 @@ def get_books(
     publisher: str = Query(None, max_length=200),
     recent: str = Query(None),  # today, week, month
     corrupted: str = Query(None),  # corrupted, no_cover, no_description
+    popular: str = Query(None),  # week, month, all_time
     db: Session = Depends(get_db),
 ):
     from datetime import datetime, timedelta
@@ -138,8 +139,21 @@ def get_books(
 
     total = count_query.scalar()
     
+    # Ordenar por popularidad si se especifica
+    if popular:
+        if popular == "week":
+            # Más descargados en la última semana (simulado por ahora con download_count)
+            books = query.filter(Book.download_count > 0).order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+        elif popular == "month":
+            # Más descargados en el último mes
+            books = query.filter(Book.download_count > 0).order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+        elif popular == "all_time":
+            # Más descargados de todos los tiempos
+            books = query.order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
+        else:
+            books = query.order_by(Book.download_count.desc()).offset(offset).limit(page_size).all()
     # Ordenar por fecha de creación si es filtro reciente, sino por autor/título
-    if recent:
+    elif recent:
         books = query.order_by(Book.created_at.desc()).offset(offset).limit(page_size).all()
     else:
         books = query.order_by(Book.author, Book.title).offset(offset).limit(page_size).all()
@@ -171,6 +185,10 @@ def download_book(book_id: int, db: Session = Depends(get_db)):
     file_path = Path(book.file_path)
     if not file_path.exists():
         raise HTTPException(status_code=404, detail="Archivo no encontrado")
+    
+    # Incrementar contador de descargas
+    book.download_count = (book.download_count or 0) + 1
+    db.commit()
     
     # Limpiar título de prefijos no deseados
     clean_title = book.title.replace("[CORRUPTO] ", "").replace("[CORRUPTO]", "").strip()
@@ -317,6 +335,17 @@ def get_stats(db: Session = Depends(get_db)):
         "total_authors": total_authors,
         "total_size_gb": round(total_size / (1024**3), 2),
     }
+
+
+@app.post("/api/books/{book_id}/favorite")
+def toggle_favorite(book_id: int, data: dict, db: Session = Depends(get_db)):
+    """Marca/desmarca un libro como favorito (simulado con localStorage en frontend)."""
+    book = db.query(Book).filter(Book.id == book_id).first()
+    if not book:
+        raise HTTPException(status_code=404, detail="Libro no encontrado")
+    
+    is_favorite = data.get("is_favorite", False)
+    return {"message": f"Libro {'agregado a' if is_favorite else 'removido de'} favoritos", "is_favorite": is_favorite}
 
 
 @app.get("/api/health")

@@ -17,8 +17,14 @@ export function useBooks() {
     publisher: null,
     recent: null,
     corrupted: null,
+    popular: null,
+    favorites: null,
   });
   const [stats, setStats] = useState(null);
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem("favorites");
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const fetchBooks = useCallback(
     async (pageNum, searchQuery, size, activeFilters) => {
@@ -40,15 +46,29 @@ export function useBooks() {
           params.append("recent", activeFilters.recent);
         if (activeFilters?.corrupted)
           params.append("corrupted", activeFilters.corrupted);
+        if (activeFilters?.popular)
+          params.append("popular", activeFilters.popular);
 
         const response = await fetch(`${API_BASE}/books?${params}`);
         if (!response.ok) throw new Error("Error al cargar libros");
 
         const data = await response.json();
 
-        setBooks(data.items);
+        // Filtrar favoritos en el frontend si es necesario
+        let filteredBooks = data.items;
+        if (activeFilters?.favorites === "only") {
+          filteredBooks = data.items.filter((book) =>
+            favorites.includes(book.id),
+          );
+        }
+
+        setBooks(filteredBooks);
         setTotalPages(data.total_pages);
-        setTotal(data.total);
+        setTotal(
+          activeFilters?.favorites === "only"
+            ? filteredBooks.length
+            : data.total,
+        );
         setPage(pageNum);
       } catch (err) {
         setError(err.message);
@@ -57,8 +77,18 @@ export function useBooks() {
         setLoading(false);
       }
     },
-    [],
+    [favorites],
   );
+
+  const toggleFavorite = useCallback((bookId) => {
+    setFavorites((prev) => {
+      const newFavorites = prev.includes(bookId)
+        ? prev.filter((id) => id !== bookId)
+        : [...prev, bookId];
+      localStorage.setItem("favorites", JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  }, []);
 
   const fetchStats = useCallback(async () => {
     try {
@@ -122,10 +152,12 @@ export function useBooks() {
     total,
     stats,
     filters,
+    favorites,
     handlePageChange,
     handlePageSizeChange,
     handleSearch,
     handleFilterChange,
+    toggleFavorite,
     search,
     refreshStats: fetchStats,
   };

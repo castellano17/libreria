@@ -41,6 +41,8 @@ export default function Filters({ onFilterChange, activeFilters }) {
       publisher: null,
       recent: null,
       corrupted: null,
+      popular: null,
+      favorites: null,
     });
   };
 
@@ -49,7 +51,9 @@ export default function Filters({ onFilterChange, activeFilters }) {
     activeFilters.language ||
     activeFilters.publisher ||
     activeFilters.recent ||
-    activeFilters.corrupted;
+    activeFilters.corrupted ||
+    activeFilters.popular ||
+    activeFilters.favorites;
 
   const activeCount = [
     activeFilters.genre,
@@ -57,6 +61,8 @@ export default function Filters({ onFilterChange, activeFilters }) {
     activeFilters.publisher,
     activeFilters.recent,
     activeFilters.corrupted,
+    activeFilters.popular,
+    activeFilters.favorites,
   ].filter(Boolean).length;
 
   // Mapeo de códigos de idioma a nombres
@@ -135,6 +141,44 @@ export default function Filters({ onFilterChange, activeFilters }) {
             <option value="today">Hoy</option>
             <option value="week">Esta semana</option>
             <option value="month">Este mes</option>
+          </select>
+        </div>
+
+        {/* Popularidad */}
+        <div className="flex-1 min-w-[140px] sm:min-w-[160px] sm:max-w-[200px]">
+          <select
+            value={activeFilters.popular || ""}
+            onChange={(e) => handleChange("popular", e.target.value)}
+            className="w-full appearance-none px-3 py-2 pr-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-0 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: "right 0.5rem center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "1.25em 1.25em",
+            }}
+          >
+            <option value="">Popularidad</option>
+            <option value="week">Más descargados (semana)</option>
+            <option value="month">Más descargados (mes)</option>
+            <option value="all_time">Más descargados (todos)</option>
+          </select>
+        </div>
+
+        {/* Favoritos */}
+        <div className="flex-1 min-w-[140px] sm:min-w-[160px] sm:max-w-[200px]">
+          <select
+            value={activeFilters.favorites || ""}
+            onChange={(e) => handleChange("favorites", e.target.value)}
+            className="w-full appearance-none px-3 py-2 pr-8 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white border-0 text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: "right 0.5rem center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "1.25em 1.25em",
+            }}
+          >
+            <option value="">Todos los libros</option>
+            <option value="only">Solo favoritos</option>
           </select>
         </div>
 

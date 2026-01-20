@@ -23,10 +23,12 @@ export default function App() {
     total,
     stats,
     filters,
+    favorites,
     handlePageChange,
     handlePageSizeChange,
     handleSearch,
     handleFilterChange,
+    toggleFavorite,
   } = useBooks();
   const { status: scanStatus, startScan, cancelScan } = useScanStatus();
   const { kindleEmail, saveKindleEmail } = useSettings();
@@ -127,6 +129,8 @@ export default function App() {
           books={books}
           loading={loading}
           onBookClick={handleBookClick}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
         />
 
         {/* Paginación */}
@@ -171,6 +175,8 @@ export default function App() {
           onClose={handleCloseModal}
           onRead={handleRead}
           kindleEmail={kindleEmail}
+          favorites={favorites}
+          onToggleFavorite={toggleFavorite}
         />
       )}
 

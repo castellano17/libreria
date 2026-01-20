@@ -16,6 +16,7 @@ class Book(Base):
     publisher = Column(String(300), nullable=True)
     genre = Column(String(200), nullable=True)
     file_size = Column(Integer, nullable=True)
+    download_count = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
 
     __table_args__ = (
@@ -25,4 +26,5 @@ class Book(Base):
         Index("idx_genre", "genre"),
         Index("idx_language", "language"),
         Index("idx_publisher", "publisher"),
+        Index("idx_download_count", "download_count"),
     )

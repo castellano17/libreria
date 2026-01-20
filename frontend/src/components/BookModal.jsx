@@ -9,7 +9,14 @@ const PLACEHOLDER_COVER =
   </svg>
 `);
 
-export default function BookModal({ book, onClose, onRead, kindleEmail }) {
+export default function BookModal({
+  book,
+  onClose,
+  onRead,
+  kindleEmail,
+  favorites,
+  onToggleFavorite,
+}) {
   const [imgError, setImgError] = useState(false);
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState(null);
@@ -19,6 +26,8 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
   // Limpiar título de prefijos no deseados
   const cleanTitle =
     book?.title?.replace(/^\[CORRUPTO\]\s*/, "") || book?.title;
+
+  const isFavorite = favorites?.includes(book?.id);
 
   // Animación de entrada
   useEffect(() => {
@@ -380,7 +389,7 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
               </div>
             )}
 
-            {/* Botones - 2x2 en móvil */}
+            {/* Botones - 2x3 en móvil con favorito */}
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <button
                 onClick={handleDownload}
@@ -469,6 +478,33 @@ export default function BookModal({ book, onClose, onRead, kindleEmail }) {
                 </svg>
                 <span className="hidden xs:inline">Compartir</span>
                 <span className="xs:hidden">Share</span>
+              </button>
+
+              {/* Botón favorito - ocupa 2 columnas */}
+              <button
+                onClick={() => onToggleFavorite(book.id)}
+                className={`col-span-2 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl text-sm font-medium transition-colors ${
+                  isFavorite
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200"
+                }`}
+              >
+                <svg
+                  className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${
+                    isFavorite ? "fill-current" : ""
+                  }`}
+                  fill={isFavorite ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                  />
+                </svg>
+                {isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}
               </button>
             </div>
           </div>
